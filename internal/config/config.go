@@ -11,7 +11,9 @@ import (
 // Config represents osb.yaml configuration (supports v1 and v2)
 type Config struct {
 	Version      int                   `yaml:"version"`
+	Mode         string                `yaml:"mode,omitempty"`         // full | light
 	Profile      string                `yaml:"profile,omitempty"`
+	Intelligence *IntelligenceConfig   `yaml:"intelligence,omitempty"`
 	Workspaces   map[string]*Workspace `yaml:"workspaces,omitempty"`
 	Paths        *PathsConfig          `yaml:"paths,omitempty"`
 	Commands     *CommandsConfig       `yaml:"commands,omitempty"`
@@ -19,6 +21,33 @@ type Config struct {
 	Policy       *PolicyConfig         `yaml:"policy,omitempty"`
 	Analysis     *AnalysisConfig       `yaml:"analysis,omitempty"`
 	Execution    *ExecutionConfig      `yaml:"execution,omitempty"`
+}
+
+// IntelligenceConfig configures the project intelligence provider.
+type IntelligenceConfig struct {
+	Provider string        `yaml:"provider,omitempty"` // ragmonk
+	RagMonk  *RagMonkConfig `yaml:"ragmonk,omitempty"`
+}
+
+// RagMonkConfig holds RagMonk-specific settings.
+type RagMonkConfig struct {
+	Executable          string           `yaml:"executable,omitempty"`
+	Source              string           `yaml:"source,omitempty"`
+	RequireHealthyIndex bool             `yaml:"require_healthy_index,omitempty"`
+	AutoIndex           bool             `yaml:"auto_index,omitempty"`
+	AutoWatch           bool             `yaml:"auto_watch,omitempty"`
+	Transport           string           `yaml:"transport,omitempty"` // cli | mcp
+	Retrieval           *RetrievalConfig `yaml:"retrieval,omitempty"`
+}
+
+// RetrievalConfig controls what RagMonk returns per query.
+type RetrievalConfig struct {
+	Command             string `yaml:"command,omitempty"`
+	MaxResults          int    `yaml:"max_results,omitempty"`
+	IncludeCode         bool   `yaml:"include_code,omitempty"`
+	IncludeTests        bool   `yaml:"include_tests,omitempty"`
+	IncludeDocs         bool   `yaml:"include_docs,omitempty"`
+	IncludeOSBKnowledge bool   `yaml:"include_osb_knowledge,omitempty"`
 }
 
 type Workspace struct {
@@ -110,11 +139,39 @@ func DefaultPolicy() *PolicyConfig {
 	}
 }
 
+func DefaultRagMonkConfig() *RagMonkConfig {
+	return &RagMonkConfig{
+		Executable:          "ragmonk",
+		Source:              "project",
+		RequireHealthyIndex: true,
+		AutoIndex:           true,
+		AutoWatch:           true,
+		Transport:           "cli",
+		Retrieval: &RetrievalConfig{
+			Command:             "explore",
+			MaxResults:          20,
+			IncludeCode:         true,
+			IncludeTests:        true,
+			IncludeDocs:         true,
+			IncludeOSBKnowledge: true,
+		},
+	}
+}
+
+func DefaultIntelligenceConfig() *IntelligenceConfig {
+	return &IntelligenceConfig{
+		Provider: "ragmonk",
+		RagMonk:  DefaultRagMonkConfig(),
+	}
+}
+
 func DefaultConfig() *Config {
 	return &Config{
 		Version: 2,
+		Mode:    "full",
 		Paths:   DefaultPaths(),
 		Policy:  DefaultPolicy(),
+		Intelligence: DefaultIntelligenceConfig(),
 	}
 }
 
@@ -176,7 +233,41 @@ func (c *Config) Validate() []string {
 	if c.Paths == nil {
 		errs = append(errs, "paths section is required")
 	}
+	if c.Mode != "" && c.Mode != "full" && c.Mode != "light" {
+		errs = append(errs, fmt.Sprintf("unsupported mode: %q (expected full or light)", c.Mode))
+	}
+	if c.IsFullMode() {
+		if c.Intelligence == nil || c.Intelligence.Provider == "" {
+			errs = append(errs, "full mode requires intelligence.provider to be set")
+		}
+	}
 	return errs
+}
+
+// IsFullMode returns true when the mode is "full" (the default).
+func (c *Config) IsFullMode() bool {
+	return c.Mode == "" || c.Mode == "full"
+}
+
+// GetIntelligence returns the intelligence config with defaults applied.
+func (c *Config) GetIntelligence() *IntelligenceConfig {
+	if c.Intelligence != nil {
+		intel := *c.Intelligence
+		if intel.RagMonk == nil {
+			intel.RagMonk = DefaultRagMonkConfig()
+		} else {
+			rm := *intel.RagMonk
+			if rm.Executable == "" {
+				rm.Executable = "ragmonk"
+			}
+			if rm.Transport == "" {
+				rm.Transport = "cli"
+			}
+			intel.RagMonk = &rm
+		}
+		return &intel
+	}
+	return DefaultIntelligenceConfig()
 }
 
 // GetPaths returns paths config with defaults applied

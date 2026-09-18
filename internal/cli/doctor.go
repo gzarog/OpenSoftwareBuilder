@@ -11,6 +11,7 @@ import (
 	"github.com/gzarog/opensoftwarebuilder/internal/detection"
 	"github.com/gzarog/opensoftwarebuilder/internal/filesystem"
 	"github.com/gzarog/opensoftwarebuilder/internal/git"
+	"github.com/gzarog/opensoftwarebuilder/internal/intelligence"
 	"github.com/gzarog/opensoftwarebuilder/internal/output"
 	"github.com/gzarog/opensoftwarebuilder/internal/platform"
 	"github.com/spf13/cobra"
@@ -164,11 +165,87 @@ func runDoctor(cmd *cobra.Command, args []string) error {
 				output.SubHeader("Active Checkpoints")
 				output.Warning(fmt.Sprintf("%d active checkpoint(s)", len(checkpoints)))
 			}
+
+			runIntelligenceDoctor(cfg, root)
 		}
 	}
 
 	output.Println("")
 	return nil
+}
+
+func runIntelligenceDoctor(cfg *config.Config, root string) {
+	output.SubHeader("Intelligence")
+
+	mode := cfg.Mode
+	if mode == "" {
+		mode = "full"
+	}
+	output.Info(fmt.Sprintf("Mode: %s", mode))
+
+	if !cfg.IsFullMode() {
+		output.Info("Provider: none (light mode)")
+		return
+	}
+
+	intel := cfg.GetIntelligence()
+	output.Info(fmt.Sprintf("Provider: %s", intel.Provider))
+
+	if intel.Provider != "ragmonk" {
+		output.Warning(fmt.Sprintf("Unknown provider: %s", intel.Provider))
+		return
+	}
+
+	provider := intelligence.NewRagMonkProvider(intel)
+
+	if !provider.IsAvailable() {
+		output.Error("RagMonk not installed")
+		output.Println("  Install: irm https://raw.githubusercontent.com/gzarog/RagMonk/main/install.ps1 | iex")
+		output.Println("  Then:    ragmonk init && ragmonk source add . && ragmonk index")
+		return
+	}
+
+	status, err := provider.GetStatus()
+	if err != nil {
+		output.Error(fmt.Sprintf("RagMonk status error: %s", err))
+		return
+	}
+
+	if status.Version != "" {
+		output.Success(fmt.Sprintf("RagMonk installed: %s", status.Version))
+	} else {
+		output.Success("RagMonk installed")
+	}
+
+	if status.Healthy {
+		output.Success("RagMonk runtime healthy")
+	} else {
+		output.Error("RagMonk runtime unhealthy — run: ragmonk doctor")
+	}
+
+	registered, _ := provider.IsSourceRegistered(root)
+	if registered {
+		output.Success("Project registered as source")
+	} else {
+		output.Error("Project not registered — run: ragmonk source add .")
+	}
+
+	if status.IndexAvailable {
+		output.Success("Knowledge index available")
+		if status.IndexHealthy {
+			output.Success("Index healthy")
+		} else {
+			output.Warning("Index degraded — run: ragmonk index")
+		}
+	} else {
+		output.Error("Knowledge index missing — run: ragmonk index")
+	}
+
+	if status.DaemonRunning {
+		output.Success("RagMonk daemon active")
+	} else {
+		output.Info("RagMonk daemon not running (optional — ragmonk daemon start)")
+	}
 }
 
 func toolchainExecutable(id string) string {
