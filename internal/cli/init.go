@@ -9,12 +9,14 @@ import (
 	"github.com/gzarog/opensoftwarebuilder/internal/config"
 	"github.com/gzarog/opensoftwarebuilder/internal/detection"
 	"github.com/gzarog/opensoftwarebuilder/internal/filesystem"
+	"github.com/gzarog/opensoftwarebuilder/internal/intelligence"
 	"github.com/gzarog/opensoftwarebuilder/internal/output"
 	"github.com/spf13/cobra"
 )
 
 var initProfile string
 var initProviders []string
+var initMode string
 
 var initCmd = &cobra.Command{
 	Use:   "init",
@@ -25,6 +27,7 @@ var initCmd = &cobra.Command{
 func init() {
 	initCmd.Flags().StringVar(&initProfile, "profile", "", "Project profile (dotnet-services, node-web, python-api, generic)")
 	initCmd.Flags().StringSliceVar(&initProviders, "providers", nil, "Provider adapters to set up (claude, codex, copilot, vscode)")
+	initCmd.Flags().StringVar(&initMode, "mode", "full", "Operating mode: full (requires RagMonk) or light")
 }
 
 func runInit(cmd *cobra.Command, args []string) error {
@@ -37,6 +40,15 @@ func runInit(cmd *cobra.Command, args []string) error {
 	output.Header("Open Software Builder — Init")
 
 	cfg := config.DefaultConfig()
+
+	// Apply mode from flag.
+	if initMode == "light" {
+		cfg.Mode = "light"
+		cfg.Intelligence = nil
+	} else {
+		cfg.Mode = "full"
+		cfg.Intelligence = config.DefaultIntelligenceConfig()
+	}
 
 	if initProfile == "" {
 		output.Println("\nDetecting repository...")
@@ -87,6 +99,10 @@ func runInit(cmd *cobra.Command, args []string) error {
 	}
 	output.Success("Created osb.yaml")
 
+	if cfg.IsFullMode() {
+		runRagMonkSetup(cfg, cwd)
+	}
+
 	gitignorePath := filepath.Join(cwd, ".osb", ".gitignore")
 	os.MkdirAll(filepath.Dir(gitignorePath), 0755)
 	os.WriteFile(gitignorePath, []byte("state/\n"), 0644)
@@ -112,10 +128,55 @@ func runInit(cmd *cobra.Command, args []string) error {
 	output.Println("")
 	output.Success("Project initialized")
 	output.Println("\n  Next steps:")
-	output.Println("    osb doctor    — verify environment")
-	output.Println("    osb status    — check project state")
+	output.Println("    osb doctor              — verify environment")
+	output.Println("    osb status              — check project state")
+	if cfg.IsFullMode() {
+		output.Println("    osb intelligence status — check RagMonk health")
+	}
 	output.Println("")
 	return nil
+}
+
+func runRagMonkSetup(cfg *config.Config, root string) {
+	output.SubHeader("Intelligence Setup")
+
+	provider := intelligence.NewRagMonkProvider(cfg.GetIntelligence())
+
+	if !provider.IsAvailable() {
+		output.Warning("RagMonk not found — full mode requires RagMonk")
+		output.Println("  Install: irm https://raw.githubusercontent.com/gzarog/RagMonk/main/install.ps1 | iex")
+		output.Println("  Then:    ragmonk init && ragmonk source add . && ragmonk index")
+		output.Println("  Run osb doctor after installing to verify the setup.")
+		return
+	}
+
+	output.Success("RagMonk found")
+
+	registered, _ := provider.IsSourceRegistered(root)
+	if registered {
+		output.Info("Project already registered as RagMonk source")
+	} else {
+		output.Println("  Registering project with RagMonk...")
+		if err := provider.RegisterSource(root); err != nil {
+			output.Warning(fmt.Sprintf("Source registration failed: %s", err))
+			output.Println("  Run manually: ragmonk source add .")
+			return
+		}
+		output.Success("Project registered as RagMonk source")
+	}
+
+	indexed, _ := provider.IsIndexed()
+	if indexed {
+		output.Info("Knowledge index already available")
+	} else {
+		output.Println("  Building knowledge index (this may take a moment)...")
+		if err := provider.Index(root); err != nil {
+			output.Warning(fmt.Sprintf("Indexing failed: %s", err))
+			output.Println("  Run manually: ragmonk index")
+			return
+		}
+		output.Success("Knowledge index built")
+	}
 }
 
 func applyToolchainDefaults(cfg *config.Config, toolchainID string, buildSystems []detection.DetectedBuildSystem) {
@@ -213,11 +274,35 @@ func setupProvider(root string, provider string) error {
 	switch provider {
 	case "claude":
 		return writeProviderFiles(root, map[string]string{
-			"CLAUDE.md":                     "# Project Instructions\n\nThis project uses Open Software Builder.\nSee core/workflow/README.md for the canonical workflow.\nSee core/roles/ for role definitions.\n\nRun `osb doctor` to check environment health.\nRun `osb status` to see project state.\n",
-			".claude/agents/architect.md":    "---\nmodel: opus\n---\n# Architect\nYou are the Architect role. See core/roles/architect.md.\n",
-			".claude/agents/implementer.md":  "---\nmodel: opus\n---\n# Implementer\nYou are the Implementer role. See core/roles/implementer.md.\n",
-			".claude/agents/reviewer.md":     "---\nmodel: opus\n---\n# Reviewer\nYou are the Reviewer role. See core/roles/reviewer.md.\n",
-			".claude/agents/qa-tester.md":    "---\nmodel: opus\n---\n# QA Tester\nYou are the QA Tester role. See core/roles/qa-tester.md.\n",
+			"CLAUDE.md": `# Project Instructions
+
+This project uses Open Software Builder in **full mode**.
+See core/workflow/README.md for the canonical workflow.
+See core/roles/ for role definitions.
+
+Run ` + "`osb doctor`" + ` to check environment health.
+Run ` + "`osb status`" + ` to see project state.
+Run ` + "`osb intelligence status`" + ` to verify RagMonk is healthy.
+
+## Full OSB Mode — Intelligence Rules
+
+In full OSB mode, all project knowledge discovery and historical context
+retrieval goes through RagMonk.
+
+**Do not** independently scan the repository to discover historical project context.
+
+**Use** the OSB-provided RagMonk context package supplied in your task prompt.
+
+**Request additional context** through ` + "`osb intelligence query`" + ` when evidence is insufficient.
+
+You may still open specific source files when implementing or reviewing them.
+The restriction applies to knowledge discovery, not to reading files
+that are already the subject of your current task.
+`,
+			".claude/agents/architect.md": "---\nmodel: opus\n---\n# Architect\nYou are the Architect role. See core/roles/architect.md.\n\nContext for this task is provided via the OSB RagMonk context package.\nDo not independently scan the repository for historical context.\n",
+			".claude/agents/implementer.md": "---\nmodel: opus\n---\n# Implementer\nYou are the Implementer role. See core/roles/implementer.md.\n\nContext for this task is provided via the OSB RagMonk context package.\nDo not independently scan the repository for historical context.\n",
+			".claude/agents/reviewer.md": "---\nmodel: opus\n---\n# Reviewer\nYou are the Reviewer role. See core/roles/reviewer.md.\n\nContext for this task is provided via the OSB RagMonk context package.\nDo not independently scan the repository for historical context.\n",
+			".claude/agents/qa-tester.md": "---\nmodel: opus\n---\n# QA Tester\nYou are the QA Tester role. See core/roles/qa-tester.md.\n\nContext for this task is provided via the OSB RagMonk context package.\nDo not independently scan the repository for historical context.\n",
 		})
 	case "codex":
 		return writeProviderFiles(root, map[string]string{

@@ -116,6 +116,108 @@ func TestConfigValidate(t *testing.T) {
 	}
 }
 
+func TestDefaultConfigMode(t *testing.T) {
+	cfg := config.DefaultConfig()
+	if cfg.Mode != "full" {
+		t.Errorf("expected default mode 'full', got %q", cfg.Mode)
+	}
+	if !cfg.IsFullMode() {
+		t.Error("expected IsFullMode() true for default config")
+	}
+	if cfg.Intelligence == nil {
+		t.Fatal("expected default intelligence config")
+	}
+	if cfg.Intelligence.Provider != "ragmonk" {
+		t.Errorf("expected provider 'ragmonk', got %q", cfg.Intelligence.Provider)
+	}
+}
+
+func TestLightModeConfig(t *testing.T) {
+	cfg := config.DefaultConfig()
+	cfg.Mode = "light"
+	cfg.Intelligence = nil
+	if cfg.IsFullMode() {
+		t.Error("expected IsFullMode() false for light mode")
+	}
+	errs := cfg.Validate()
+	for _, e := range errs {
+		t.Errorf("unexpected validation error: %s", e)
+	}
+}
+
+func TestFullModeRequiresProvider(t *testing.T) {
+	cfg := config.DefaultConfig()
+	cfg.Mode = "full"
+	cfg.Intelligence = &config.IntelligenceConfig{} // no provider
+	errs := cfg.Validate()
+	found := false
+	for _, e := range errs {
+		if e != "" {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("expected validation error when full mode has no provider")
+	}
+}
+
+func TestInvalidModeConfig(t *testing.T) {
+	cfg := config.DefaultConfig()
+	cfg.Mode = "turbo"
+	errs := cfg.Validate()
+	if len(errs) == 0 {
+		t.Error("expected validation error for unknown mode")
+	}
+}
+
+func TestLoadConfigWithIntelligence(t *testing.T) {
+	dir := t.TempDir()
+	content := `version: 2
+mode: full
+intelligence:
+  provider: ragmonk
+  ragmonk:
+    executable: ragmonk
+    auto_index: true
+    transport: cli
+`
+	os.WriteFile(filepath.Join(dir, "osb.yaml"), []byte(content), 0644)
+	cfg, err := config.Load(dir)
+	if err != nil {
+		t.Fatalf("failed to load config: %v", err)
+	}
+	if cfg.Mode != "full" {
+		t.Errorf("expected mode 'full', got %q", cfg.Mode)
+	}
+	if cfg.Intelligence == nil {
+		t.Fatal("expected intelligence section")
+	}
+	if cfg.Intelligence.Provider != "ragmonk" {
+		t.Errorf("expected provider 'ragmonk', got %q", cfg.Intelligence.Provider)
+	}
+	intel := cfg.GetIntelligence()
+	if intel.RagMonk.Executable != "ragmonk" {
+		t.Errorf("expected executable 'ragmonk', got %q", intel.RagMonk.Executable)
+	}
+}
+
+func TestGetIntelligenceDefaults(t *testing.T) {
+	cfg := &config.Config{Version: 2, Mode: "full"}
+	intel := cfg.GetIntelligence()
+	if intel == nil {
+		t.Fatal("expected non-nil intelligence config")
+	}
+	if intel.RagMonk == nil {
+		t.Fatal("expected non-nil ragmonk config")
+	}
+	if intel.RagMonk.Executable != "ragmonk" {
+		t.Errorf("expected default executable 'ragmonk', got %q", intel.RagMonk.Executable)
+	}
+	if intel.RagMonk.Transport != "cli" {
+		t.Errorf("expected default transport 'cli', got %q", intel.RagMonk.Transport)
+	}
+}
+
 func TestSaveAndLoad(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.DefaultConfig()

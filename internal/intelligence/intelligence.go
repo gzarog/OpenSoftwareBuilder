@@ -1,0 +1,76 @@
+package intelligence
+
+// Provider is the intelligence interface OSB uses. All project knowledge
+// discovery in full mode must go through an implementation of this interface.
+type Provider interface {
+	// IsAvailable returns true if the provider binary/service can be found.
+	IsAvailable() bool
+
+	// GetStatus returns the current health snapshot.
+	GetStatus() (*Status, error)
+
+	// IsSourceRegistered checks whether the repository root is registered.
+	IsSourceRegistered(root string) (bool, error)
+
+	// RegisterSource registers the repository root with the provider.
+	RegisterSource(root string) error
+
+	// IsIndexed checks whether a knowledge index exists and is available.
+	IsIndexed() (bool, error)
+
+	// Index triggers a full or incremental index of the registered source.
+	Index(root string) error
+
+	// Explore runs a free-text knowledge retrieval query.
+	Explore(query string, opts ExploreOptions) (*ExploreResult, error)
+}
+
+// Status is a health snapshot of the intelligence provider.
+type Status struct {
+	Available        bool
+	Version          string
+	Healthy          bool
+	SourceRegistered bool
+	IndexAvailable   bool
+	IndexHealthy     bool
+	DaemonRunning    bool
+}
+
+// ExploreOptions controls what the retrieval query returns.
+type ExploreOptions struct {
+	MaxResults          int
+	IncludeCode         bool
+	IncludeTests        bool
+	IncludeDocs         bool
+	IncludeOSBKnowledge bool
+}
+
+// ExploreResult holds the evidence package returned by a retrieval query.
+type ExploreResult struct {
+	Items []EvidenceItem
+}
+
+// EvidenceItem is a single piece of evidence from the intelligence provider.
+type EvidenceItem struct {
+	File    string
+	Content string
+	Score   float64
+	Kind    string // code, test, doc, task, component
+}
+
+// FullModeError is returned when full mode requirements are not met.
+type FullModeError struct {
+	Code    string
+	Message string
+	Remedy  string
+}
+
+func (e *FullModeError) Error() string { return e.Message }
+
+const (
+	ErrRagMonkMissing         = "FULL_MODE_RAGMONK_MISSING"
+	ErrSourceNotRegistered    = "FULL_MODE_SOURCE_NOT_REGISTERED"
+	ErrIndexMissing           = "FULL_MODE_INDEX_MISSING"
+	ErrIndexFailed            = "FULL_MODE_INDEX_FAILED"
+	ErrProviderUnhealthy      = "FULL_MODE_PROVIDER_UNHEALTHY"
+)
