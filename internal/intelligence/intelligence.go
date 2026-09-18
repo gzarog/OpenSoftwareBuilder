@@ -21,8 +21,19 @@ type Provider interface {
 	// Index triggers a full or incremental index of the registered source.
 	Index(root string) error
 
+	// EnsureFreshIndex checks whether the index is current and triggers an
+	// incremental index when the source is dirty. No-op when already fresh.
+	EnsureFreshIndex(root string) error
+
 	// Explore runs a free-text knowledge retrieval query.
 	Explore(query string, opts ExploreOptions) (*ExploreResult, error)
+
+	// Symbol resolves a named symbol (function, type, variable) and returns
+	// its definition context from the intelligence provider.
+	Symbol(name string) (string, error)
+
+	// Impact returns the set of callers and dependents for a given file or symbol.
+	Impact(target string) (string, error)
 }
 
 // Status is a health snapshot of the intelligence provider.
@@ -43,6 +54,10 @@ type ExploreOptions struct {
 	IncludeTests        bool
 	IncludeDocs         bool
 	IncludeOSBKnowledge bool
+	// OsbTypes filters results to specific osb_type values (e.g. task, component, architecture).
+	OsbTypes []string
+	// Components filters results to specific component names.
+	Components []string
 }
 
 // ExploreResult holds the evidence package returned by a retrieval query.

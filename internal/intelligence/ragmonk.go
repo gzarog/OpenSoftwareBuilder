@@ -142,6 +142,29 @@ func (r *RagMonkProvider) Index(root string) error {
 	return nil
 }
 
+// EnsureFreshIndex checks whether the source is dirty and triggers an incremental
+// index when auto_index is enabled. It is a no-op when the index is already current.
+func (r *RagMonkProvider) EnsureFreshIndex(root string) error {
+	if !r.IsAvailable() {
+		return &FullModeError{
+			Code:    ErrRagMonkMissing,
+			Message: "RagMonk executable not found",
+			Remedy:  installInstructions(),
+		}
+	}
+	if !r.cfg.AutoIndex {
+		return nil
+	}
+	// ragmonk index status --check-dirty exits non-zero when the source is dirty.
+	_, dirty := r.run("index", "status", "--check-dirty")
+	if dirty != nil {
+		if err := r.Index(root); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Explore runs a free-text knowledge retrieval query via ragmonk explore.
 func (r *RagMonkProvider) Explore(query string, opts ExploreOptions) (*ExploreResult, error) {
 	if !r.IsAvailable() {
@@ -177,6 +200,12 @@ func (r *RagMonkProvider) Explore(query string, opts ExploreOptions) (*ExploreRe
 	if opts.IncludeOSBKnowledge {
 		args = append(args, "--include=osb-knowledge")
 	}
+	for _, t := range opts.OsbTypes {
+		args = append(args, "--type="+t)
+	}
+	for _, c := range opts.Components {
+		args = append(args, "--component="+c)
+	}
 
 	out, err := r.run(args...)
 	if err != nil {
@@ -186,6 +215,38 @@ func (r *RagMonkProvider) Explore(query string, opts ExploreOptions) (*ExploreRe
 	return &ExploreResult{
 		Items: []EvidenceItem{{Content: out, Kind: "raw"}},
 	}, nil
+}
+
+// Symbol resolves a named symbol via ragmonk symbol <name>.
+func (r *RagMonkProvider) Symbol(name string) (string, error) {
+	if !r.IsAvailable() {
+		return "", &FullModeError{
+			Code:    ErrRagMonkMissing,
+			Message: "RagMonk executable not found",
+			Remedy:  installInstructions(),
+		}
+	}
+	out, err := r.run("symbol", name)
+	if err != nil {
+		return "", fmt.Errorf("ragmonk symbol: %w", err)
+	}
+	return out, nil
+}
+
+// Impact returns callers and dependents for a file or symbol via ragmonk impact.
+func (r *RagMonkProvider) Impact(target string) (string, error) {
+	if !r.IsAvailable() {
+		return "", &FullModeError{
+			Code:    ErrRagMonkMissing,
+			Message: "RagMonk executable not found",
+			Remedy:  installInstructions(),
+		}
+	}
+	out, err := r.run("impact", target)
+	if err != nil {
+		return "", fmt.Errorf("ragmonk impact: %w", err)
+	}
+	return out, nil
 }
 
 func installInstructions() string {
