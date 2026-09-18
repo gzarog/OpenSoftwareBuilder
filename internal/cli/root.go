@@ -38,6 +38,7 @@ func init() {
 	rootCmd.AddCommand(workspaceCmd)
 	rootCmd.AddCommand(intelligenceCmd)
 	rootCmd.AddCommand(artifactCmd)
+	rootCmd.AddCommand(contextCmd)
 	rootCmd.AddCommand(versionCmd)
 }
 
