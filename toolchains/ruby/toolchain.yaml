@@ -1,0 +1,17 @@
+id: ruby
+name: "Ruby"
+detect:
+  files: ["Gemfile"]
+source_extensions: [.rb, .rake]
+generated: [vendor/bundle]
+requires:
+  - executable: ruby
+commands:
+  restore: { argv: [bundle, install] }
+  build: { argv: [bundle, exec, rake, build] }
+  test: { argv: [bundle, exec, rspec] }
+  lint: { argv: [bundle, exec, rubocop] }
+  format: { argv: [bundle, exec, rubocop, --autocorrect] }
+analysis:
+  lsp: solargraph
+  tree_sitter: ruby

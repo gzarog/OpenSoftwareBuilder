@@ -1,0 +1,9 @@
+id: cmake
+name: "CMake"
+toolchain: cpp
+detect:
+  files: ["CMakeLists.txt"]
+commands:
+  restore: { argv: [cmake, -S, ., -B, build] }
+  build: { argv: [cmake, --build, build] }
+  test: { argv: [ctest, --test-dir, build] }

@@ -1,0 +1,9 @@
+id: gradle
+name: "Gradle"
+toolchain: java
+detect:
+  files: ["build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts"]
+commands:
+  restore: { argv: [gradle, dependencies] }
+  build: { argv: [gradle, build] }
+  test: { argv: [gradle, test] }

@@ -1,0 +1,9 @@
+id: yarn
+name: "Yarn"
+toolchain: node
+detect:
+  files: ["yarn.lock"]
+commands:
+  restore: { argv: [yarn, install] }
+  build: { argv: [yarn, build] }
+  test: { argv: [yarn, test] }

@@ -1,0 +1,17 @@
+id: dotnet
+name: ".NET"
+detect:
+  files: ["*.sln", "*.slnx", "*.csproj", "*.fsproj", "*.vbproj"]
+source_extensions: [.cs, .fs, .vb]
+generated: [bin, obj, TestResults, .artifacts]
+requires:
+  - executable: dotnet
+commands:
+  restore: { argv: [dotnet, restore] }
+  build: { argv: [dotnet, build, --no-restore] }
+  test: { argv: [dotnet, test, --no-build] }
+  lint: { argv: [dotnet, format, --verify-no-changes] }
+  format: { argv: [dotnet, format] }
+analysis:
+  lsp: OmniSharp
+  tree_sitter: c_sharp
