@@ -26,6 +26,22 @@ Palette (Ctrl+Shift+P -> Tasks: Run Task):
 - `OSB: Gate Knowledge Inspect` — check knowledge gate
 - `OSB: Knowledge Record` — record knowledge
 
+## Full Mode — Intelligence Rules
+
+When the project is configured in **Full OSB mode** (`mode: full`), any AI agent active
+in this VS Code workspace **must** follow these rules without exception:
+
+> **Do not independently scan the repository to discover historical project context.
+> Use the OSB-provided RagMonk context package.**
+
+The VS Code adapter generates a task `OSB: Context Build` that runs
+`osb context build "<query>" --role <role>` from the integrated terminal. Agents should
+use this task (or run the command directly) rather than browsing `.osb/knowledge/` or
+other files to reconstruct project history.
+
+If RagMonk is unavailable (`OSB: Intelligence Status` task shows errors), report the
+error and stop. There is no silent fallback to direct filesystem scanning in full mode.
+
 ## Notes
 
 - VS Code itself is not an AI agent provider — it's the IDE. This adapter makes OSB
