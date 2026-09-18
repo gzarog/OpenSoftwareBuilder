@@ -1,6 +1,6 @@
 # Build output
-osb
-osb-*
+/osb
+/osb-*
 *.exe
 
 # Go
