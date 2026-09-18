@@ -9,6 +9,7 @@ import (
 	"github.com/gzarog/opensoftwarebuilder/internal/config"
 	"github.com/gzarog/opensoftwarebuilder/internal/filesystem"
 	"github.com/gzarog/opensoftwarebuilder/internal/gates"
+	"github.com/gzarog/opensoftwarebuilder/internal/intelligence"
 	"github.com/gzarog/opensoftwarebuilder/internal/knowledge"
 	"github.com/gzarog/opensoftwarebuilder/internal/output"
 	"github.com/spf13/cobra"
@@ -92,11 +93,52 @@ func runStatus(cmd *cobra.Command, args []string) error {
 		output.SubHeader("Workspaces")
 		for name, ws := range cfg.Workspaces {
 			exists := filesystem.DirExists(filepath.Join(root, ws.Path))
-			status := "ok"
+			wsStatus := "ok"
 			if !exists {
-				status = "path not found"
+				wsStatus = "path not found"
 			}
-			output.Printf("  %-15s %s @ %s (%s)\n", name, ws.Toolchain, ws.Path, status)
+			output.Printf("  %-15s %s @ %s (%s)\n", name, ws.Toolchain, ws.Path, wsStatus)
+		}
+	}
+
+	// Phase 19: intelligence block in full mode.
+	if cfg.IsFullMode() {
+		output.SubHeader("Intelligence")
+		intel := cfg.GetIntelligence()
+		transport := "cli"
+		if intel.RagMonk != nil && intel.RagMonk.Transport != "" {
+			transport = intel.RagMonk.Transport
+		}
+		output.Printf("  %-12s %s\n", "Mode", cfg.Mode)
+		output.Printf("  %-12s %s\n", "Provider", intel.Provider)
+		output.Printf("  %-12s %s\n", "Transport", transport)
+
+		provider := intelligence.NewProvider(intel)
+		if !provider.IsAvailable() {
+			output.Printf("  %-12s not found\n", "RagMonk")
+		} else {
+			provStatus, err := provider.GetStatus()
+			if err != nil {
+				output.Printf("  %-12s error: %s\n", "Status", err)
+			} else {
+				healthLabel := "healthy"
+				if !provStatus.Healthy {
+					healthLabel = "unhealthy"
+				}
+				output.Printf("  %-12s %s\n", "Health", healthLabel)
+				indexLabel := "available"
+				if !provStatus.IndexAvailable {
+					indexLabel = "missing"
+				} else if !provStatus.IndexHealthy {
+					indexLabel = "degraded"
+				}
+				output.Printf("  %-12s %s\n", "Index", indexLabel)
+				daemonLabel := "running"
+				if !provStatus.DaemonRunning {
+					daemonLabel = "not running"
+				}
+				output.Printf("  %-12s %s\n", "Daemon", daemonLabel)
+			}
 		}
 	}
 

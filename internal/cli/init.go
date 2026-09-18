@@ -186,6 +186,21 @@ func runRagMonkSetup(cfg *config.Config, root string) {
 		}
 		output.Success("Knowledge index built")
 	}
+
+	// Phase 13: start the daemon when auto_watch is configured.
+	intel := cfg.GetIntelligence()
+	if intel.RagMonk != nil && intel.RagMonk.AutoWatch {
+		if ds, ok := provider.(intelligence.DaemonStarter); ok {
+			status, _ := provider.GetStatus()
+			if status == nil || !status.DaemonRunning {
+				output.Println("  Starting RagMonk daemon (auto_watch: true)...")
+				ds.StartDaemon()
+				output.Success("RagMonk daemon started")
+			} else {
+				output.Info("RagMonk daemon already running")
+			}
+		}
+	}
 }
 
 func applyToolchainDefaults(cfg *config.Config, toolchainID string, buildSystems []detection.DetectedBuildSystem) {

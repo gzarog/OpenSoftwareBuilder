@@ -73,6 +73,12 @@ type EvidenceItem struct {
 	Kind    string // code, test, doc, task, component
 }
 
+// DaemonStarter is an optional capability a Provider may expose to start
+// the intelligence daemon in the background when auto_watch is configured.
+type DaemonStarter interface {
+	StartDaemon()
+}
+
 // FullModeError is returned when full mode requirements are not met.
 type FullModeError struct {
 	Code    string

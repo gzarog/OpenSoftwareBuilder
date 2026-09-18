@@ -78,10 +78,7 @@ func runContextBuild(cmd *cobra.Command, args []string) error {
 
 	ctx, err := intelligence.BuildTaskContext(provider, query, contextRole, opts)
 	if err != nil {
-		if fme, ok := err.(*intelligence.FullModeError); ok {
-			output.Error(fmt.Sprintf("[%s] %s", fme.Code, fme.Message))
-			output.Println(fme.Remedy)
-		} else {
+		if !printFullModeError(err) {
 			output.Error(err.Error())
 		}
 		return nil
