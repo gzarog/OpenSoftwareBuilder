@@ -66,6 +66,10 @@ type PathsConfig struct {
 	Generated   []string `yaml:"generated,omitempty"`
 	Checkpoints string   `yaml:"checkpoints,omitempty"`
 	Knowledge   string   `yaml:"knowledge,omitempty"`
+	Specs       string   `yaml:"specs,omitempty"`
+	Reviews     string   `yaml:"reviews,omitempty"`
+	QA          string   `yaml:"qa,omitempty"`
+	Decisions   string   `yaml:"decisions,omitempty"`
 	State       string   `yaml:"state,omitempty"`
 }
 
@@ -127,6 +131,10 @@ func DefaultPaths() *PathsConfig {
 		Generated:   []string{"bin", "obj", "node_modules", "dist", "build", ".next", "out", "coverage"},
 		Checkpoints: ".osb/progress",
 		Knowledge:   ".osb/knowledge",
+		Specs:       ".osb/specs",
+		Reviews:     ".osb/reviews",
+		QA:          ".osb/qa",
+		Decisions:   ".osb/decisions",
 		State:       ".osb/state",
 	}
 }

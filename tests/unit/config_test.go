@@ -201,6 +201,22 @@ intelligence:
 	}
 }
 
+func TestDefaultPathsArtifactDirs(t *testing.T) {
+	paths := config.DefaultPaths()
+	if paths.Specs != ".osb/specs" {
+		t.Errorf("expected specs '.osb/specs', got %q", paths.Specs)
+	}
+	if paths.Reviews != ".osb/reviews" {
+		t.Errorf("expected reviews '.osb/reviews', got %q", paths.Reviews)
+	}
+	if paths.QA != ".osb/qa" {
+		t.Errorf("expected qa '.osb/qa', got %q", paths.QA)
+	}
+	if paths.Decisions != ".osb/decisions" {
+		t.Errorf("expected decisions '.osb/decisions', got %q", paths.Decisions)
+	}
+}
+
 func TestGetIntelligenceDefaults(t *testing.T) {
 	cfg := &config.Config{Version: 2, Mode: "full"}
 	intel := cfg.GetIntelligence()

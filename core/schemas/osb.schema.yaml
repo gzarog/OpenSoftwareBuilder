@@ -99,8 +99,24 @@ properties:
         default: .osb/progress
       knowledge:
         type: string
-        description: Directory for durable knowledge records
+        description: Directory for durable knowledge records (tasks/ and components/)
         default: .osb/knowledge
+      specs:
+        type: string
+        description: Directory for architecture specifications (indexed by RagMonk in full mode)
+        default: .osb/specs
+      reviews:
+        type: string
+        description: Directory for review findings (indexed by RagMonk in full mode)
+        default: .osb/reviews
+      qa:
+        type: string
+        description: Directory for QA evidence (indexed by RagMonk in full mode)
+        default: .osb/qa
+      decisions:
+        type: string
+        description: Directory for architecture decisions (indexed by RagMonk in full mode)
+        default: .osb/decisions
       state:
         type: string
         description: Directory for gate state markers
