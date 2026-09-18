@@ -201,7 +201,7 @@ func runIntelligenceDoctor(cfg *config.Config, root string) {
 		return
 	}
 
-	provider := intelligence.NewRagMonkProvider(intel)
+	provider := intelligence.NewProvider(intel)
 
 	if !provider.IsAvailable() {
 		output.Error("RagMonk not installed")

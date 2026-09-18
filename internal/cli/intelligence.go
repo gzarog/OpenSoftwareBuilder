@@ -40,7 +40,7 @@ func init() {
 	intelligenceCmd.AddCommand(intelligenceQueryCmd)
 }
 
-func loadIntelligenceProvider() (*intelligence.RagMonkProvider, *config.Config, string, error) {
+func loadIntelligenceProvider() (intelligence.Provider, *config.Config, string, error) {
 	cwd, _ := os.Getwd()
 	root, err := config.FindRoot(cwd)
 	if err != nil {
@@ -53,7 +53,7 @@ func loadIntelligenceProvider() (*intelligence.RagMonkProvider, *config.Config, 
 	if !cfg.IsFullMode() {
 		return nil, cfg, root, fmt.Errorf("intelligence commands require full mode (current mode: light)")
 	}
-	provider := intelligence.NewRagMonkProvider(cfg.GetIntelligence())
+	provider := intelligence.NewProvider(cfg.GetIntelligence())
 	return provider, cfg, root, nil
 }
 
