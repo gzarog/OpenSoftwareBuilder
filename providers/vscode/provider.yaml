@@ -1,0 +1,18 @@
+id: vscode
+name: "VS Code"
+files:
+  - source: .vscode/settings.json
+    target: .vscode/settings.json
+  - source: .vscode/extensions.json
+    target: .vscode/extensions.json
+  - source: .vscode/launch.json
+    target: .vscode/launch.json
+  - source: .vscode/tasks.json
+    target: .vscode/tasks.json
+directories:
+  - .vscode
+capabilities:
+  - settings
+  - extensions
+  - tasks
+  - launch_configs

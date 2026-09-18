@@ -1,0 +1,9 @@
+id: pnpm
+name: "pnpm"
+toolchain: node
+detect:
+  files: ["pnpm-lock.yaml", "pnpm-workspace.yaml"]
+commands:
+  restore: { argv: [pnpm, install] }
+  build: { argv: [pnpm, run, build] }
+  test: { argv: [pnpm, test] }

@@ -1,0 +1,9 @@
+id: generic
+name: "Generic"
+detect:
+  files: []
+source_extensions: []
+generated: []
+requires: []
+commands: {}
+analysis: {}

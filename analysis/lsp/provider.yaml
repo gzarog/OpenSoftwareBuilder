@@ -1,0 +1,29 @@
+id: lsp
+name: "Language Server Protocol"
+type: analysis
+description: "Provides code intelligence via LSP-compatible language servers"
+capabilities:
+  - completion
+  - diagnostics
+  - hover
+  - definition
+  - references
+  - rename
+  - symbols
+  - formatting
+  - code_actions
+configuration:
+  initialization_options: {}
+  workspace_configuration: {}
+supported_toolchains:
+  dotnet: OmniSharp
+  node: typescript-language-server
+  python: pyright
+  go: gopls
+  rust: rust-analyzer
+  java: jdtls
+  kotlin: kotlin-language-server
+  cpp: clangd
+  php: phpactor
+  ruby: solargraph
+  dart: dart

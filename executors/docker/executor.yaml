@@ -1,0 +1,19 @@
+id: docker
+name: "Docker"
+type: executor
+description: "Executes commands inside Docker containers"
+isolation: container
+requirements:
+  - executable: docker
+capabilities:
+  - isolated_filesystem
+  - volume_mounts
+  - network_isolation
+  - image_selection
+  - resource_limits
+configuration:
+  default_image: "ubuntu:latest"
+  mount_workspace: true
+  mount_mode: "rw"
+  network: "bridge"
+  remove_on_exit: true

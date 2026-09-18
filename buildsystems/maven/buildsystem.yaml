@@ -1,0 +1,9 @@
+id: maven
+name: "Maven"
+toolchain: java
+detect:
+  files: ["pom.xml"]
+commands:
+  restore: { argv: [mvn, dependency:resolve] }
+  build: { argv: [mvn, compile] }
+  test: { argv: [mvn, test] }

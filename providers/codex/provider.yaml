@@ -1,0 +1,11 @@
+id: codex
+name: "OpenAI Codex CLI"
+files:
+  - source: AGENTS.md
+    target: AGENTS.md
+  - source: codex.json
+    target: codex.json
+directories: []
+capabilities:
+  - memory
+  - settings

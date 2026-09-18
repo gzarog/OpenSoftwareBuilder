@@ -1,0 +1,22 @@
+id: tree-sitter
+name: "Tree-sitter"
+type: analysis
+description: "Provides fast incremental parsing for syntax analysis"
+capabilities:
+  - parsing
+  - syntax_highlighting
+  - structural_queries
+  - incremental_updates
+  - code_navigation
+supported_grammars:
+  dotnet: c_sharp
+  node: typescript
+  python: python
+  go: go
+  rust: rust
+  java: java
+  kotlin: kotlin
+  cpp: cpp
+  php: php
+  ruby: ruby
+  dart: dart

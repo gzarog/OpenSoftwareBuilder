@@ -1,0 +1,17 @@
+id: go
+name: "Go"
+detect:
+  files: ["go.mod"]
+source_extensions: [.go]
+generated: [vendor, bin]
+requires:
+  - executable: go
+commands:
+  restore: { argv: [go, mod, download] }
+  build: { argv: [go, build, ./...] }
+  test: { argv: [go, test, ./...] }
+  lint: { argv: [golangci-lint, run] }
+  format: { argv: [gofmt, -w, .] }
+analysis:
+  lsp: gopls
+  tree_sitter: go

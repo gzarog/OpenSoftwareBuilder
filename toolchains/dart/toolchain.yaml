@@ -1,0 +1,17 @@
+id: dart
+name: "Dart"
+detect:
+  files: ["pubspec.yaml"]
+source_extensions: [.dart]
+generated: [build, .dart_tool]
+requires:
+  - executable: dart
+commands:
+  restore: { argv: [dart, pub, get] }
+  build: { argv: [dart, compile, exe] }
+  test: { argv: [dart, test] }
+  lint: { argv: [dart, analyze] }
+  format: { argv: [dart, format, .] }
+analysis:
+  lsp: dart
+  tree_sitter: dart

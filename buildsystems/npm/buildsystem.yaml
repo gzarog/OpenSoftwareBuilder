@@ -1,0 +1,9 @@
+id: npm
+name: "npm"
+toolchain: node
+detect:
+  files: ["package-lock.json"]
+commands:
+  restore: { argv: [npm, install] }
+  build: { argv: [npm, run, build] }
+  test: { argv: [npm, test] }
