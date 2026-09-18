@@ -20,6 +20,24 @@ func NewManager(root string, knowledgeDir string) *Manager {
 	}
 }
 
+// TaskRecordOptions carries optional metadata for automated task recording (Phase 14).
+type TaskRecordOptions struct {
+	Components []string // component names touched by this task
+	Status     string   // in-progress | shipped | abandoned
+	Tier       int      // 1-5 effort tier
+	Summary    string   // brief one-line summary of what was done
+	Decisions  string   // key decisions captured inline
+}
+
+// ComponentRecordOptions carries optional metadata for component records (Phase 14).
+type ComponentRecordOptions struct {
+	TaskID   string // task that prompted this record
+	Status   string // active | deprecated | removed
+	Tier     int
+	Language string
+	Purpose  string
+}
+
 func (m *Manager) EnsureDirs() error {
 	dirs := []string{
 		m.dir,
@@ -114,73 +132,146 @@ func (m *Manager) IndexRows(limit int) ([]string, error) {
 
 func (m *Manager) Dir() string { return m.dir }
 
-func (m *Manager) CreateTaskRecord(name string) (string, error) {
+// CreateTaskRecord creates a structured task Markdown file with YAML front matter.
+// An optional TaskRecordOptions enables automated recording from workflow artifacts.
+func (m *Manager) CreateTaskRecord(name string, opts ...TaskRecordOptions) (string, error) {
 	if err := m.EnsureDirs(); err != nil {
 		return "", err
 	}
-	date := time.Now().Format("2006-01-02")
-	filename := fmt.Sprintf("%s-%s.md", date, name)
-	path := filepath.Join(m.dir, "tasks", filename)
-	content := fmt.Sprintf(`---
-osb_type: task
-task_id: %s
-status: in-progress
-date: %s
----
 
+	var o TaskRecordOptions
+	if len(opts) > 0 {
+		o = opts[0]
+	}
+
+	date := time.Now().Format("2006-01-02")
+	status := o.Status
+	if status == "" {
+		status = "in-progress"
+	}
+
+	// Build YAML front matter
+	fm := fmt.Sprintf("---\nosb_type: task\ntask_id: %s\nstatus: %s\ndate: %s\n", name, status, date)
+	if o.Tier > 0 {
+		fm += fmt.Sprintf("tier: %d\n", o.Tier)
+	}
+	if len(o.Components) > 0 {
+		fm += "component:\n"
+		for _, c := range o.Components {
+			fm += fmt.Sprintf("  - %s\n", c)
+		}
+	}
+	fm += "---\n"
+
+	componentStr := strings.Join(o.Components, ", ")
+	if componentStr == "" {
+		componentStr = ""
+	}
+
+	tierStr := ""
+	if o.Tier > 0 {
+		tierStr = fmt.Sprintf("%d", o.Tier)
+	}
+
+	summarySection := o.Summary
+	if summarySection == "" {
+		summarySection = ""
+	}
+	decisionsSection := o.Decisions
+	if decisionsSection == "" {
+		decisionsSection = ""
+	}
+
+	content := fm + fmt.Sprintf(`
 # %s
 
 | Field | Value |
 |---|---|
 | Date | %s |
-| Components | |
-| Status | in-progress |
-| Tier | |
+| Components | %s |
+| Status | %s |
+| Tier | %s |
 
 ## What & why
 
+%s
+
 ## Decisions
+
+%s
 
 ## Gotchas
 
 ## QA result
 
 ## Follow-ups
-`, name, date, name, date)
+`, name, date, componentStr, status, tierStr, summarySection, decisionsSection)
+
+	filename := fmt.Sprintf("%s-%s.md", date, name)
+	path := filepath.Join(m.dir, "tasks", filename)
 	return path, os.WriteFile(path, []byte(content), 0644)
 }
 
-func (m *Manager) CreateComponentRecord(name string) (string, error) {
+// CreateComponentRecord creates a structured component Markdown file with YAML front matter.
+// An optional ComponentRecordOptions enables automated recording from workflow artifacts.
+func (m *Manager) CreateComponentRecord(name string, opts ...ComponentRecordOptions) (string, error) {
 	if err := m.EnsureDirs(); err != nil {
 		return "", err
 	}
-	date := time.Now().Format("2006-01-02")
-	filename := fmt.Sprintf("%s-%s.md", date, name)
-	path := filepath.Join(m.dir, "components", filename)
-	content := fmt.Sprintf(`---
-osb_type: component
-name: %s
-status: active
-date: %s
----
 
+	var o ComponentRecordOptions
+	if len(opts) > 0 {
+		o = opts[0]
+	}
+
+	date := time.Now().Format("2006-01-02")
+	status := o.Status
+	if status == "" {
+		status = "active"
+	}
+
+	fm := fmt.Sprintf("---\nosb_type: component\nname: %s\nstatus: %s\ndate: %s\n", name, status, date)
+	if o.Tier > 0 {
+		fm += fmt.Sprintf("tier: %d\n", o.Tier)
+	}
+	if o.TaskID != "" {
+		fm += fmt.Sprintf("task_id: %s\n", o.TaskID)
+	}
+	if o.Language != "" {
+		fm += fmt.Sprintf("language: %s\n", o.Language)
+	}
+	fm += "---\n"
+
+	tierStr := ""
+	if o.Tier > 0 {
+		tierStr = fmt.Sprintf("%d", o.Tier)
+	}
+
+	purposeSection := o.Purpose
+
+	content := fm + fmt.Sprintf(`
 # %s
 
 | Field | Value |
 |---|---|
 | Date | %s |
-| Status | active |
-| Tier | |
-| Language | |
+| Status | %s |
+| Tier | %s |
+| Language | %s |
 
 ## Purpose
+
+%s
 
 ## Interfaces
 
 ## Dependencies
 
 ## Notes
-`, name, date, name, date)
+`, name, date, status, tierStr, o.Language, purposeSection)
+
+	filename := fmt.Sprintf("%s-%s.md", date, name)
+	path := filepath.Join(m.dir, "components", filename)
 	return path, os.WriteFile(path, []byte(content), 0644)
 }
 

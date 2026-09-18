@@ -149,7 +149,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 func runRagMonkSetup(cfg *config.Config, root string) {
 	output.SubHeader("Intelligence Setup")
 
-	provider := intelligence.NewRagMonkProvider(cfg.GetIntelligence())
+	provider := intelligence.NewProvider(cfg.GetIntelligence())
 
 	if !provider.IsAvailable() {
 		output.Warning("RagMonk not found — full mode requires RagMonk")

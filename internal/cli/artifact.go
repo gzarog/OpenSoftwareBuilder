@@ -79,7 +79,7 @@ func runArtifactRecord(cmd *cobra.Command, args []string) error {
 	output.Success(fmt.Sprintf("Created %s: %s", typeName, path))
 
 	if cfg.IsFullMode() {
-		provider := intelligence.NewRagMonkProvider(cfg.GetIntelligence())
+		provider := intelligence.NewProvider(cfg.GetIntelligence())
 		if provider.IsAvailable() {
 			output.Println("Indexing artifact with RagMonk...")
 			if idxErr := provider.Index(root); idxErr != nil {

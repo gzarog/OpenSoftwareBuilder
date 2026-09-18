@@ -56,7 +56,7 @@ func runContextBuild(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	provider := intelligence.NewRagMonkProvider(cfg.GetIntelligence())
+	provider := intelligence.NewProvider(cfg.GetIntelligence())
 	if !provider.IsAvailable() {
 		output.Error("RagMonk not available — full mode requires RagMonk")
 		output.Println("Install: irm https://raw.githubusercontent.com/gzarog/RagMonk/main/install.ps1 | iex")
