@@ -39,6 +39,7 @@ func init() {
 	rootCmd.AddCommand(intelligenceCmd)
 	rootCmd.AddCommand(artifactCmd)
 	rootCmd.AddCommand(contextCmd)
+	rootCmd.AddCommand(migrateCmd)
 	rootCmd.AddCommand(versionCmd)
 }
 

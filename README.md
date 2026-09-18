@@ -141,22 +141,81 @@ policy:
   sensitive_areas: [auth, payments]
 ```
 
+## Full Mode — RagMonk intelligence
+
+OSB supports two modes:
+
+| Mode | Intelligence | Use when |
+| ---- | ------------ | -------- |
+| `light` | Optional — knowledge files only | Quick start, no RagMonk |
+| `full` | **Mandatory** — all context through RagMonk | Production workflows |
+
+In **Full Mode**, every agent dispatch is grounded in a bounded evidence package from the
+RagMonk knowledge index. Agents must not scan the repository independently for historical
+context — this is enforced by the `intelligence` gate and by each adapter's instructions.
+
+```yaml
+# osb.yaml — enable full mode
+mode: full
+intelligence:
+  provider: ragmonk
+  ragmonk:
+    auto_index: true
+    auto_watch: true
+```
+
+**Quick setup:**
+```sh
+osb migrate                              # guided setup (installs, registers, indexes)
+osb gate intelligence inspect            # verify readiness
+osb context build "my task" --role implementer  # build evidence package
+```
+
+See [`docs/intelligence/`](docs/intelligence/) for full documentation.
+
 ## CLI commands
+
+### Core workflow
 
 | Command | Description |
 | --- | --- |
 | `osb init` | Initialize a project with OSB |
 | `osb doctor` | Validate configuration and health |
-| `osb status` | Show gates, checkpoints, recent knowledge |
+| `osb status` | Show gates, checkpoints, knowledge, and intelligence |
 | `osb changed [min]` | Detect changes (git or mtime fallback) |
 | `osb validate spec <file>` | Validate architecture spec format |
 | `osb validate checkpoint <file>` | Validate checkpoint format |
+| `osb migrate` | Upgrade project to Full OSB Mode |
+
+### Gates
+
+| Command | Description |
+| --- | --- |
 | `osb gate review inspect` | Check review gate state |
 | `osb gate review approve` | Record reviewer approval |
 | `osb gate review skip "<reason>"` | Auditable review skip |
 | `osb gate knowledge inspect` | Check knowledge gate state |
 | `osb gate knowledge skip "<reason>"` | Auditable knowledge skip |
+| `osb gate intelligence inspect` | Check intelligence readiness (full mode) |
+
+### Knowledge
+
+| Command | Description |
+| --- | --- |
 | `osb knowledge record` | Knowledge recording helper |
+| `osb knowledge record task <name>` | Create a task knowledge record |
+| `osb knowledge record component <name>` | Create a component knowledge record |
+
+### Intelligence (full mode)
+
+| Command | Description |
+| --- | --- |
+| `osb intelligence status` | Health snapshot |
+| `osb intelligence doctor` | Detailed step-by-step check |
+| `osb intelligence index` | Trigger full/incremental index |
+| `osb intelligence refresh` | Incremental update when dirty |
+| `osb intelligence query <text>` | Free-text knowledge query |
+| `osb context build "<query>" --role <role>` | Build bounded evidence package |
 
 ## License
 
