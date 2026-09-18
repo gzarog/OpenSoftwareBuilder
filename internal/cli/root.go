@@ -37,6 +37,7 @@ func init() {
 	rootCmd.AddCommand(pluginsCmd)
 	rootCmd.AddCommand(workspaceCmd)
 	rootCmd.AddCommand(intelligenceCmd)
+	rootCmd.AddCommand(artifactCmd)
 	rootCmd.AddCommand(versionCmd)
 }
 
