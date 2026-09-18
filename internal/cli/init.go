@@ -87,6 +87,11 @@ func runInit(cmd *cobra.Command, args []string) error {
 		filepath.Join(paths.Knowledge, "tasks"),
 		filepath.Join(paths.Knowledge, "components"),
 		paths.State,
+		// Phase 6: durable artifact dirs indexed by RagMonk
+		".osb/specs",
+		".osb/reviews",
+		".osb/qa",
+		".osb/decisions",
 	}
 	for _, d := range dirs {
 		if err := os.MkdirAll(filepath.Join(cwd, d), 0755); err != nil {
@@ -107,14 +112,18 @@ func runInit(cmd *cobra.Command, args []string) error {
 	os.MkdirAll(filepath.Dir(gitignorePath), 0755)
 	os.WriteFile(gitignorePath, []byte("state/\n"), 0644)
 
-	templates := map[string]string{
-		".osb/progress/.gitkeep":    "",
-		".osb/knowledge/INDEX.md":   "# Knowledge Index\n\n| Date | Task | Components | Tier |\n|---|---|---|---|\n",
+	// Write .gitkeep files so empty dirs are tracked by git.
+	gitkeeps := []string{
+		".osb/progress/.gitkeep",
+		".osb/specs/.gitkeep",
+		".osb/reviews/.gitkeep",
+		".osb/qa/.gitkeep",
+		".osb/decisions/.gitkeep",
 	}
-	for relPath, content := range templates {
+	for _, relPath := range gitkeeps {
 		fullPath := filepath.Join(cwd, relPath)
 		os.MkdirAll(filepath.Dir(fullPath), 0755)
-		os.WriteFile(fullPath, []byte(content), 0644)
+		os.WriteFile(fullPath, []byte(""), 0644)
 	}
 
 	for _, provider := range initProviders {

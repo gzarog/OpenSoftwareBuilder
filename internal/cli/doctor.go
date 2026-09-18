@@ -76,6 +76,11 @@ func runDoctor(cmd *cobra.Command, args []string) error {
 			if filesystem.DirExists(filepath.Join(root, paths.Knowledge)) {
 				output.Success(fmt.Sprintf("Knowledge: %s", paths.Knowledge))
 			}
+			for _, artifactDir := range []string{paths.Specs, paths.Reviews, paths.QA, paths.Decisions} {
+				if artifactDir != "" && filesystem.DirExists(filepath.Join(root, artifactDir)) {
+					output.Success(fmt.Sprintf("Artifacts: %s", artifactDir))
+				}
+			}
 
 			if cfg.Commands != nil {
 				if cfg.Commands.Build != nil {

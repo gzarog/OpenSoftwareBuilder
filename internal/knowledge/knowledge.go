@@ -118,15 +118,23 @@ func (m *Manager) CreateTaskRecord(name string) (string, error) {
 	if err := m.EnsureDirs(); err != nil {
 		return "", err
 	}
-	filename := fmt.Sprintf("%s-%s.md", time.Now().Format("2006-01-02"), name)
+	date := time.Now().Format("2006-01-02")
+	filename := fmt.Sprintf("%s-%s.md", date, name)
 	path := filepath.Join(m.dir, "tasks", filename)
-	template := fmt.Sprintf(`# %s
+	content := fmt.Sprintf(`---
+osb_type: task
+task_id: %s
+status: in-progress
+date: %s
+---
+
+# %s
 
 | Field | Value |
 |---|---|
 | Date | %s |
 | Components | |
-| Status | completed |
+| Status | in-progress |
 | Tier | |
 
 ## What & why
@@ -138,6 +146,9 @@ func (m *Manager) CreateTaskRecord(name string) (string, error) {
 ## QA result
 
 ## Follow-ups
-`, name, time.Now().Format("2006-01-02"))
-	return path, os.WriteFile(path, []byte(template), 0644)
+`, name, date, name, date)
+	return path, os.WriteFile(path, []byte(content), 0644)
 }
+
+// IndexRows is kept for light-mode backward compatibility.
+// In full mode, RagMonk is the index — do not call this for knowledge discovery.
