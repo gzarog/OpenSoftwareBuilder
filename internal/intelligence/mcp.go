@@ -166,6 +166,12 @@ func (m *MCPProvider) GetStatus() (*Status, error) {
 	return cli.GetStatus()
 }
 
+// StartDaemon delegates to the CLI provider.
+func (m *MCPProvider) StartDaemon() {
+	cli := &RagMonkProvider{cfg: m.cfg}
+	cli.StartDaemon()
+}
+
 // IsSourceRegistered delegates to CLI.
 func (m *MCPProvider) IsSourceRegistered(root string) (bool, error) {
 	cli := &RagMonkProvider{cfg: m.cfg}

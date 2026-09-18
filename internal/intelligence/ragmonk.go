@@ -249,6 +249,20 @@ func (r *RagMonkProvider) Impact(target string) (string, error) {
 	return out, nil
 }
 
+// StartDaemon starts the ragmonk daemon in the background if it is not already running.
+// It is a best-effort operation: errors are intentionally ignored so that a missing or
+// failing daemon never blocks the main workflow.
+func (r *RagMonkProvider) StartDaemon() {
+	if !r.IsAvailable() {
+		return
+	}
+	if _, err := r.run("daemon", "status"); err == nil {
+		return // already running
+	}
+	// Fire-and-forget: start daemon in background, don't wait for it.
+	exec.Command(r.exe(), "daemon", "start").Start() //nolint:errcheck
+}
+
 func installInstructions() string {
 	return "Install RagMonk:\n  irm https://raw.githubusercontent.com/gzarog/RagMonk/main/install.ps1 | iex\n\nThen run:\n  ragmonk init\n  ragmonk source add .\n  ragmonk index\n  osb doctor"
 }
