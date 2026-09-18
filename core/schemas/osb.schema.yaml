@@ -1,0 +1,92 @@
+# JSON Schema for osb.yaml project configuration (expressed as YAML for readability)
+# Validate with: osb doctor
+
+type: object
+required: [version]
+additionalProperties: false
+
+properties:
+  version:
+    type: integer
+    const: 1
+
+  paths:
+    type: object
+    additionalProperties: false
+    properties:
+      source:
+        type: array
+        items: { type: string }
+        description: Directories containing project source code
+        default: [src]
+      generated:
+        type: array
+        items: { type: string }
+        description: Directories to exclude from change detection (build output, deps)
+        default: [bin, obj, node_modules, dist, build, .next, out, coverage]
+      checkpoints:
+        type: string
+        description: Directory for agent checkpoint files
+        default: .osb/progress
+      knowledge:
+        type: string
+        description: Directory for durable knowledge records
+        default: .osb/knowledge
+      state:
+        type: string
+        description: Directory for gate state markers
+        default: .osb/state
+
+  commands:
+    type: object
+    additionalProperties: false
+    properties:
+      build:
+        type: [string, 'null']
+        description: Build command run from project root
+      test:
+        type: [string, 'null']
+        description: Test command run from project root
+      fitness:
+        type: [string, 'null']
+        description: Architecture fitness test command
+      e2e:
+        type: [string, 'null']
+        description: End-to-end test command
+      changed:
+        type: [string, 'null']
+        description: Custom change-detection command (default uses git or mtime)
+
+  capabilities:
+    type: object
+    additionalProperties: false
+    properties:
+      structural_explorer:
+        type: [string, 'null']
+        enum: [codegraph, lsp, null]
+        description: Preferred structural code explorer
+      browser_qa:
+        type: string
+        enum: [required, optional, none]
+        default: optional
+        description: Whether browser-based QA is required for UI components
+
+  policy:
+    type: object
+    additionalProperties: false
+    properties:
+      require_independent_review:
+        type: boolean
+        default: true
+      require_fresh_qa:
+        type: boolean
+        default: true
+      sensitive_areas:
+        type: array
+        items: { type: string }
+        default: [auth, payments, external-input]
+        description: Areas requiring individual review (not batched)
+
+  profile:
+    type: string
+    description: Named profile from profiles/ to inherit defaults from

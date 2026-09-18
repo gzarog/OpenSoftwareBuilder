@@ -1,0 +1,36 @@
+# .NET services profile — defaults for a .NET microservice workspace
+
+paths:
+  source:
+    - services
+    - apps
+    - packages
+    - contracts
+  generated:
+    - bin
+    - obj
+    - node_modules
+    - dist
+    - build
+    - .artifacts
+    - TestResults
+    - coverage
+    - .next
+    - out
+
+commands:
+  build: dotnet build
+  test: dotnet test
+  fitness: null
+  e2e: null
+
+capabilities:
+  structural_explorer: codegraph
+  browser_qa: optional
+
+policy:
+  sensitive_areas:
+    - auth
+    - payments
+    - settlement
+    - external-input
