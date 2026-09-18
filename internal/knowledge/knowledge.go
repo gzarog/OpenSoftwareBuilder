@@ -150,5 +150,39 @@ date: %s
 	return path, os.WriteFile(path, []byte(content), 0644)
 }
 
+func (m *Manager) CreateComponentRecord(name string) (string, error) {
+	if err := m.EnsureDirs(); err != nil {
+		return "", err
+	}
+	date := time.Now().Format("2006-01-02")
+	filename := fmt.Sprintf("%s-%s.md", date, name)
+	path := filepath.Join(m.dir, "components", filename)
+	content := fmt.Sprintf(`---
+osb_type: component
+name: %s
+status: active
+date: %s
+---
+
+# %s
+
+| Field | Value |
+|---|---|
+| Date | %s |
+| Status | active |
+| Tier | |
+| Language | |
+
+## Purpose
+
+## Interfaces
+
+## Dependencies
+
+## Notes
+`, name, date, name, date)
+	return path, os.WriteFile(path, []byte(content), 0644)
+}
+
 // IndexRows is kept for light-mode backward compatibility.
 // In full mode, RagMonk is the index — do not call this for knowledge discovery.
