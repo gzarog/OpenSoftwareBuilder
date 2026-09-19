@@ -44,13 +44,30 @@ CANONICAL_REFERENCES = (
     "references/handoff.md",
     "references/knowledge.md",
     "references/ragmonk.md",
+    "references/state.md",
 )
 
+# Subagent-facing content must be self-contained: no reads of the full canonical skill or
+# its shared reference files at dispatch time (token-optimization phase 2).
+FORBIDDEN_SUBAGENT_SUBSTRINGS = (
+    "SKILL.md",
+    "osb/references/",
+)
+
+# Soft size guardrails (bytes). Guidance, not hard architecture requirements.
+SKILL_MD_SIZE_GUARD = 4000
+COPILOT_INSTRUCTIONS_SIZE_GUARD = 1500
+
 errors: list[str] = []
+warnings: list[str] = []
 
 
 def fail(message: str) -> None:
     errors.append(message)
+
+
+def warn(message: str) -> None:
+    warnings.append(message)
 
 
 def read(path: Path) -> str:
@@ -192,6 +209,81 @@ def check_osb_yaml_template() -> None:
         if f"{role}:" not in text:
             fail(f"{path.relative_to(ROOT)}: missing '{role}:' model field")
 
+    if "max_parallel_implementers" not in text:
+        fail(
+            f"{path.relative_to(ROOT)}: missing 'max_parallel_implementers' "
+            "(execution.max_parallel_implementers must exist or default explicitly)"
+        )
+    if "refresh_after_knowledge_change" not in text:
+        fail(
+            f"{path.relative_to(ROOT)}: missing 'ragmonk.refresh_after_knowledge_change'"
+        )
+    if "refresh_after_checkpoint" in text:
+        fail(
+            f"{path.relative_to(ROOT)}: uses deprecated key 'refresh_after_checkpoint' "
+            "(renamed to 'refresh_after_knowledge_change')"
+        )
+
+
+def check_subagents_self_contained() -> None:
+    """Subagents must not read the full OSB skill or shared reference files at dispatch
+    time — each role prompt should be self-contained (token-optimization phase 2)."""
+
+    for role in ROLES:
+        claude_path = ROOT / f".claude/agents/{role}.md"
+        if claude_path.is_file():
+            _check_no_forbidden_substrings(claude_path, read(claude_path))
+
+        copilot_path = ROOT / f".github/agents/{role}.agent.md"
+        if copilot_path.is_file():
+            _check_no_forbidden_substrings(copilot_path, read(copilot_path))
+
+        codex_path = ROOT / f".codex/agents/{role}.toml"
+        if codex_path.is_file():
+            raw = read(codex_path)
+            try:
+                data = tomllib.loads(raw)
+            except tomllib.TOMLDecodeError:
+                continue  # already reported by check_codex_agents
+            instructions = data.get("developer_instructions", "")
+            _check_no_forbidden_substrings(codex_path, instructions)
+
+
+def _check_no_forbidden_substrings(path: Path, text: str) -> None:
+    for substring in FORBIDDEN_SUBAGENT_SUBSTRINGS:
+        if substring in text:
+            fail(
+                f"{path.relative_to(ROOT)}: subagent content references '{substring}' "
+                "— subagents must be self-contained and not read shared OSB policy files"
+            )
+
+
+def check_compact_and_delta_docs() -> None:
+    path = ROOT / ".agents/skills/osb/references/handoff.md"
+    if not path.is_file():
+        return  # already reported by check_canonical_skill
+    text = read(path).lower()
+    if "unit capsule" not in text:
+        fail(f"{path.relative_to(ROOT)}: compact handoff rules (unit capsules) not documented")
+    if "delta" not in text:
+        fail(f"{path.relative_to(ROOT)}: delta-only repair loop rules not documented")
+
+
+def check_size_guards() -> None:
+    skill_path = ROOT / ".agents/skills/osb/SKILL.md"
+    if skill_path.is_file() and skill_path.stat().st_size > SKILL_MD_SIZE_GUARD:
+        warn(
+            f"{skill_path.relative_to(ROOT)}: {skill_path.stat().st_size} bytes "
+            f"(guardrail: <= {SKILL_MD_SIZE_GUARD})"
+        )
+
+    copilot_path = ROOT / ".github/copilot-instructions.md"
+    if copilot_path.is_file() and copilot_path.stat().st_size > COPILOT_INSTRUCTIONS_SIZE_GUARD:
+        warn(
+            f"{copilot_path.relative_to(ROOT)}: {copilot_path.stat().st_size} bytes "
+            f"(guardrail: <= {COPILOT_INSTRUCTIONS_SIZE_GUARD})"
+        )
+
 
 def check_legacy_dirs_absent() -> None:
     for name in LEGACY_DIRS:
@@ -208,6 +300,15 @@ def main() -> int:
     check_copilot_agents()
     check_osb_yaml_template()
     check_legacy_dirs_absent()
+    check_subagents_self_contained()
+    check_compact_and_delta_docs()
+    check_size_guards()
+
+    if warnings:
+        print(f"OSB v2 structure validation: {len(warnings)} warning(s):\n")
+        for warning in warnings:
+            print(f"  - {warning}")
+        print()
 
     if errors:
         print(f"OSB v2 structure validation failed with {len(errors)} error(s):\n")

@@ -16,21 +16,26 @@ responsibilities, prohibitions, and output formats:
 ```text
 /osb <task>
 
-1. Resolve host
-2. Resolve models
-3. Verify RagMonk
-4. Retrieve relevant knowledge
-5. Run Architect
-6. Run Implementer(s)
-7. Run Reviewer
-8. Repair loop if needed
-9. Run QA
-10. Repair/design loop if needed
-11. Consolidate knowledge
-12. Complete
+0.  Resume check (compact task state)
+1.  Resolve host
+2.  Resolve models
+3.  Verify RagMonk
+4.  Load or create compact task state
+5.  Retrieve relevant knowledge (bounded, progressive)
+6.  Run Architect                          — checkpoint
+7.  Run Implementer(s), min necessary fan-out — checkpoint
+8.  Run Reviewer                           — checkpoint
+9.  Repair loop if needed (delta only)     — checkpoint
+10. Run QA                                 — checkpoint
+11. Repair/design loop if needed (delta only)
+12. Consolidate knowledge                  — checkpoint
+13. Complete
 ```
 
-Full detail: `.agents/skills/osb/references/workflow.md`.
+Execution state is persisted after every checkpoint so an interrupted task can resume
+from its current phase instead of restarting. Information moves forward between roles as
+references + compact state + deltas, never as full transcripts. Full detail:
+`.agents/skills/osb/references/workflow.md` and `.agents/skills/osb/references/state.md`.
 
 ## Model resolution
 
@@ -50,26 +55,14 @@ rather than silently falling back to ad hoc search. Full detail:
 
 ## Handoff format
 
-Every role transition uses one conceptual result shape:
-
-```markdown
-## Outcome
-
-Completed | Blocked | Findings | Pass | Fail
-
-## Changes
-
-## Acceptance Criteria
-
-## Verification
-
-## Knowledge Discovered
-
-## Blockers
-```
-
-Full detail, including the per-role specialization of this shape:
-`.agents/skills/osb/references/handoff.md`.
+The Architect returns a design document; Implementer, Reviewer, and QA return compact
+YAML results (`status`, changed files/findings/AC verdicts, `knowledge`) instead of
+free-form narrative reports. An Implementer receives a **unit capsule** (its unit, files,
+acceptance criteria, constraints, bounded knowledge) rather than the full task and
+architecture. A review or QA failure sends only the affected finding/AC as a delta back to
+an Implementer or Architect — never a replay of the whole task. Full detail, including the
+per-role schemas: `.agents/skills/osb/references/handoff.md` and
+`.agents/skills/osb/references/roles.md`.
 
 ## Incremental knowledge format
 
@@ -80,6 +73,14 @@ during the task, then consolidated after clean QA into an immutable task record
 (`.osb/knowledge/tasks/`) and updated component records (`.osb/knowledge/components/`).
 Knowledge files are authoritative; RagMonk indexes them. Full detail:
 `.agents/skills/osb/references/knowledge.md`.
+
+## Execution state
+
+Task progress is persisted as compact, mutable JSON at `.osb/state/<task-id>.json` —
+current phase, unit status, open findings, failed acceptance criteria, and a knowledge
+watermark. It is separate from durable knowledge, is not indexed by RagMonk, and lets an
+interrupted task resume from its current phase instead of restarting. Full detail:
+`.agents/skills/osb/references/state.md`.
 
 ## Completion criteria
 

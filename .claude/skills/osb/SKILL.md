@@ -15,6 +15,12 @@ mechanics: how to resolve models and launch each role as a Claude Code subagent.
 For model resolution (`osb.yaml` → `models.<host>.*`) and RagMonk access, the host is
 `claude-code`.
 
+## Resume check
+
+Before dispatching anything, check `.osb/state/<task-id>.json` for an active task
+(`phase != complete`) per `.agents/skills/osb/references/state.md`. If found, resume from
+that phase instead of restarting — do not rerun roles whose phase has already passed.
+
 ## Resolving models
 
 Read `osb.yaml` at the repository root. If `models.claude-code.architect`,
@@ -49,13 +55,19 @@ Each of the four roles is a Claude Code subagent defined in `.claude/agents/`:
 
 Dispatch a role with the Agent tool, `subagent_type` set to the role's name
 (`architect`, `implementer`, `reviewer`, or `qa`), and `model` set to the model resolved
-for that role in `osb.yaml`. Pass the role's dispatch brief (per
-`.agents/skills/osb/references/handoff.md`) as the agent prompt — it must be
-self-contained, since the subagent starts with no memory of this conversation.
+for that role in `osb.yaml`. Pass only the role's compact dispatch brief — a unit capsule
+for an Implementer, diff + acceptance criteria for a Reviewer, acceptance criteria +
+verification targets for QA (per `.agents/skills/osb/references/handoff.md`) — never a
+full transcript, since the subagent starts with no memory of this conversation and does
+not itself read any OSB policy file.
 
-For parallel-safe implementation units, dispatch the corresponding Implementer agents in
-a single message with multiple Agent tool calls, per the canonical workflow's
-parallel-safety rules. Otherwise dispatch sequentially, one unit at a time.
+Default to one Implementer; dispatch more only when the Architect's units are genuinely
+independent, up to `osb.yaml` → `execution.max_parallel_implementers` (default 2). For
+parallel-safe units, dispatch the corresponding Implementer agents in a single message
+with multiple Agent tool calls. Otherwise dispatch sequentially, one unit at a time.
+
+After each role returns, persist a checkpoint to `.osb/state/<task-id>.json` per
+`.agents/skills/osb/references/state.md` before dispatching the next role.
 
 ## RagMonk access
 

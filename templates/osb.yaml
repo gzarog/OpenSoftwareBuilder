@@ -20,6 +20,12 @@ models:
     reviewer:
     qa:
 
+execution:
+  max_parallel_implementers: 2
+  compact_handoffs: true
+  checkpoint_state: true
+  delta_repairs: true
+
 knowledge:
   enabled: true
   incremental: true
@@ -29,4 +35,4 @@ ragmonk:
   enabled: true
   required: true
   retrieve_before_architecture: true
-  refresh_after_checkpoint: true
+  refresh_after_knowledge_change: true
