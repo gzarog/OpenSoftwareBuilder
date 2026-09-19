@@ -40,3 +40,8 @@ Description:
 
 `Knowledge Discovered` is optional. Keep your output compact — it is what the next role
 receives instead of your reasoning transcript.
+
+**Quality:** if a required interface, dependency, or existing decision is unknown or
+ambiguous, say so explicitly and ask for it rather than guessing — never invent behavior.
+Every mandatory constraint and acceptance criterion you define must reach each unit's
+capsule intact; never drop or paraphrase one away just to keep a unit small.

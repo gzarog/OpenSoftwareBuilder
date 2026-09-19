@@ -24,7 +24,7 @@ lines only.
 **Required output (compact YAML, no narrative):**
 
 ```yaml
-status: done   # or: blocked
+status: done   # or: blocked, needs-evidence
 changed:
   - path/to/file.ext
 verify:
@@ -34,4 +34,9 @@ knowledge:
   - type: gotcha
     summary: <one line>
 blocker: null   # one precise sentence, only when status is blocked
+context_request: null   # {question, reason, request, ac}, only when status is needs-evidence
 ```
+
+If your capsule is missing a needed interface, constraint, or dependency detail, report
+`needs-evidence` naming the exact question — never invent behavior or silently violate a
+stated constraint to keep going.
