@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OSB Knowledge Event",
+  "description": "A single incremental knowledge capture record written during an active task.",
+  "type": "object",
+  "required": ["id", "timestamp", "task_id", "role"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique event identifier (event-<hex> or none-<role>).",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC capture time in RFC 3339 format."
+    },
+    "task_id": {
+      "type": "string",
+      "description": "Identifier of the active task this event belongs to.",
+      "minLength": 1
+    },
+    "role": {
+      "type": "string",
+      "enum": ["architect", "implementer", "reviewer", "qa"],
+      "description": "The workflow role that captured this event."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "decision",
+        "constraint",
+        "discovery",
+        "gotcha",
+        "assumption",
+        "assumption-invalidated",
+        "review-finding",
+        "qa-result",
+        "follow-up"
+      ],
+      "description": "Controlled vocabulary of event kinds."
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["temporary", "task", "component", "global", "discard"],
+      "description": "Intended durability and reach of this knowledge."
+    },
+    "summary": {
+      "type": "string",
+      "description": "One-sentence statement of the finding.",
+      "minLength": 1
+    },
+    "reason": {
+      "type": "string",
+      "description": "Why this fact matters or was captured."
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["confirmed", "suspected", "unverified"],
+      "description": "How certain the capturer is about this fact."
+    },
+    "supersedes": {
+      "type": "string",
+      "description": "ID of an earlier event that this event invalidates or replaces."
+    },
+    "none": {
+      "type": "boolean",
+      "description": "When true, this is an explicit 'no findings' checkpoint marker rather than a real event."
+    },
+    "none_reason": {
+      "type": "string",
+      "description": "Explanation for why zero findings were recorded."
+    },
+    "source": {
+      "type": "object",
+      "description": "Source evidence for this event.",
+      "additionalProperties": false,
+      "properties": {
+        "files": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "File paths that led to this finding."
+        }
+      }
+    }
+  },
+  "if": { "properties": { "none": { "const": true } } },
+  "then": { "required": ["id", "timestamp", "task_id", "role", "none"] },
+  "else": { "required": ["id", "timestamp", "task_id", "role", "type", "summary"] }
+}

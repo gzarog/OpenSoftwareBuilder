@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gzarog/opensoftwarebuilder/internal/config"
+	"github.com/gzarog/opensoftwarebuilder/internal/event"
 	"github.com/gzarog/opensoftwarebuilder/internal/filesystem"
 	"github.com/gzarog/opensoftwarebuilder/internal/gates"
 	"github.com/gzarog/opensoftwarebuilder/internal/intelligence"
@@ -19,6 +20,13 @@ var gateCmd = &cobra.Command{
 	Short: "Manage quality gates",
 	Args:  cobra.MinimumNArgs(2),
 	RunE:  runGate,
+}
+
+var gateTaskID string
+
+func init() {
+	gateCmd.Flags().StringVar(&gateTaskID, "task-id", "",
+		"Task ID for role-aware knowledge gate inspection (or set OSB_TASK_ID)")
 }
 
 func runGate(cmd *cobra.Command, args []string) error {
@@ -58,6 +66,9 @@ func runGate(cmd *cobra.Command, args []string) error {
 
 	switch action {
 	case "inspect":
+		if gateName == "knowledge" {
+			return runKnowledgeGateInspect(root, cfg, gm, latestMtime)
+		}
 		gate, err := gm.Inspect(gateName, latestMtime)
 		if err != nil {
 			return err
@@ -69,7 +80,7 @@ func runGate(cmd *cobra.Command, args []string) error {
 		}
 	case "approve":
 		if gateName == "knowledge" {
-			return fmt.Errorf("knowledge gate cannot be directly approved — it is derived from knowledge mtime")
+			return fmt.Errorf("knowledge gate cannot be directly approved — it is derived from knowledge mtime or role checkpoints")
 		}
 		if err := gm.Approve(gateName); err != nil {
 			return err
@@ -161,4 +172,128 @@ func runIntelligenceGate(action string) error {
 	}
 	output.Println("")
 	return nil
+}
+
+// runKnowledgeGateInspect shows a role-aware knowledge gate status. When a task
+// ID is provided (via --task-id or OSB_TASK_ID), it checks that each required
+// role has completed its knowledge checkpoint. Without a task ID it falls back
+// to the legacy mtime-based gate.
+func runKnowledgeGateInspect(root string, cfg *config.Config, gm *gates.Manager, latestMtime float64) error {
+	// Resolve optional task ID.
+	taskID := gateTaskID
+	if taskID == "" {
+		taskID = os.Getenv("OSB_TASK_ID")
+	}
+
+	output.Header("Gate: knowledge")
+	output.Println("")
+
+	if taskID == "" {
+		// Legacy mode: mtime-based gate only.
+		gate, err := gm.Inspect("knowledge", latestMtime)
+		if err != nil {
+			return err
+		}
+		output.Printf("  State: %s\n", formatGateState(gate))
+		if gate.SkipReason != "" {
+			output.Printf("  Reason: %s\n", gate.SkipReason)
+		}
+		output.Println("")
+		output.Info("  Tip: pass --task-id <id> for role-aware checkpoint verification.")
+		output.Println("")
+		return nil
+	}
+
+	paths := cfg.GetPaths()
+	store := event.NewStore(root, paths.Checkpoints, taskID)
+	summary := store.Summary()
+
+	output.Printf("  Task: %s\n\n", taskID)
+
+	policy := cfg.GetPolicy()
+	blocked := false
+
+	// Check each role.
+	for _, role := range event.AllRoles {
+		rs := summary[role]
+		roleName := strings.ToUpper(role[:1]) + role[1:]
+
+		// Determine whether this role is required.
+		required := isRoleRequired(role, policy)
+
+		if !required {
+			output.Printf("  %s\n    (not required by policy)\n\n", roleName)
+			continue
+		}
+
+		if rs.HasCheckpoint() {
+			if rs.HasNone {
+				output.Printf("  ✓ %s\n    no reusable findings", roleName)
+				if rs.NoneReason != "" {
+					output.Printf(" — %s", rs.NoneReason)
+				}
+				output.Println("")
+			} else {
+				output.Printf("  ✓ %s\n", roleName)
+				for t, n := range rs.ByType {
+					output.Printf("    %d %s\n", n, t)
+				}
+			}
+		} else {
+			output.Printf("  ✗ %s\n    checkpoint missing\n", roleName)
+			blocked = true
+		}
+		output.Println("")
+	}
+
+	// Check durable consolidation: task record exists in .osb/knowledge/tasks/.
+	taskRecordExists := knowledgeTaskRecordExists(root, paths.Knowledge, taskID)
+	if taskRecordExists {
+		output.Success("Consolidation: complete")
+	} else {
+		output.Error("Consolidation: pending — run: osb knowledge consolidate --task-id " + taskID)
+		blocked = true
+	}
+
+	output.Println("")
+	if blocked {
+		output.Error("Knowledge gate: BLOCKED")
+	} else {
+		output.Success("Knowledge gate: PASS")
+	}
+	output.Println("")
+	return nil
+}
+
+// isRoleRequired returns whether the role must complete a knowledge checkpoint.
+// Architect is always required; reviewer and QA follow the policy config.
+func isRoleRequired(role string, policy *config.PolicyConfig) bool {
+	switch role {
+	case "architect":
+		return true
+	case "implementer":
+		return true
+	case "reviewer":
+		return policy == nil || policy.RequireIndependentReview
+	case "qa":
+		return policy == nil || policy.RequireFreshQA
+	}
+	return false
+}
+
+// knowledgeTaskRecordExists reports whether a consolidated task record has been
+// written to .osb/knowledge/tasks/ for the given task ID.
+func knowledgeTaskRecordExists(root, knowledgeDir, taskID string) bool {
+	tasksDir := filepath.Join(root, knowledgeDir, "tasks")
+	entries, err := os.ReadDir(tasksDir)
+	if err != nil {
+		return false
+	}
+	slug := strings.ToLower(taskID)
+	for _, e := range entries {
+		if strings.Contains(strings.ToLower(e.Name()), slug) {
+			return true
+		}
+	}
+	return false
 }
