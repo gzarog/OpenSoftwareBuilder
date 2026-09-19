@@ -38,6 +38,12 @@ type RagMonkConfig struct {
 	AutoWatch           bool             `yaml:"auto_watch,omitempty"`
 	Transport           string           `yaml:"transport,omitempty"` // cli | mcp
 	Retrieval           *RetrievalConfig `yaml:"retrieval,omitempty"`
+	// ActiveTaskKnowledge makes incremental knowledge events available through RagMonk
+	// for later agents in the same task. Requires Full Mode.
+	ActiveTaskKnowledge bool `yaml:"active_task_knowledge,omitempty"`
+	// RefreshOnCheckpoint triggers a RagMonk incremental index after each knowledge
+	// capture event so later agents immediately benefit from the new discovery.
+	RefreshOnCheckpoint bool `yaml:"refresh_on_checkpoint,omitempty"`
 }
 
 // RetrievalConfig controls what RagMonk returns per query.
@@ -163,6 +169,8 @@ func DefaultRagMonkConfig() *RagMonkConfig {
 			IncludeDocs:         true,
 			IncludeOSBKnowledge: true,
 		},
+		ActiveTaskKnowledge: true,
+		RefreshOnCheckpoint: true,
 	}
 }
 

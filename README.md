@@ -2,11 +2,12 @@
 
 An auditable, provider-neutral multi-agent software-delivery workflow that takes
 repository work from architecture through implementation, independent review, QA, and
-durable project memory.
+durable project memory — with **incremental knowledge capture** at every step.
 
 Open Software Builder is a local repository toolkit — not another agent runtime. Claude
 Code, OpenAI Codex, GitHub Copilot, and future systems supply the agents; Open Software
-Builder supplies the organization, contracts, state machine, evidence, and quality gates.
+Builder supplies the organization, contracts, state machine, evidence, quality gates, and
+knowledge management.
 
 ## Quick start
 
@@ -63,23 +64,33 @@ open-software-builder/
 ```
 Lead / Orchestrator
     |
-    +-- Knowledge query
+    +-- RagMonk context (existing durable knowledge)
     |
     v
   Architect
     |  specification + acceptance criteria
+    |  └── knowledge checkpoint (decisions, constraints, assumptions)
     v
   Implementer(s)
     |  implementation + tests + checkpoints
+    |  └── knowledge checkpoint(s) (discoveries, gotchas, changed assumptions)
     v
   Independent Reviewer
     |  findings or approval
+    |  └── knowledge checkpoint (recurring patterns, risks)
     v
   Fresh QA Tester
     |  build + tests + fitness + e2e/browser
+    |  └── knowledge checkpoint (verified behavior, failure conditions)
+    v
+  Knowledge Consolidation
+    |  osb knowledge consolidate --task-id <id>
     v
   Durable Knowledge
+    (tasks/ + components/ + INDEX.md + RagMonk index refresh)
 ```
+
+**Core principle:** capture facts immediately; consolidate them later.
 
 ### Triage
 
@@ -200,11 +211,82 @@ See [`docs/intelligence/`](docs/intelligence/) for full documentation.
 
 ### Knowledge
 
+#### Incremental capture (during active tasks)
+
 | Command | Description |
 | --- | --- |
-| `osb knowledge record` | Knowledge recording helper |
-| `osb knowledge record task <name>` | Create a task knowledge record |
-| `osb knowledge record component <name>` | Create a component knowledge record |
+| `osb knowledge capture --task-id <id> --role <role> --type <type> --summary "<text>"` | Capture a knowledge event (decision, discovery, gotcha, …) |
+| `osb knowledge capture --none --role <role> --reason-none "<text>"` | Explicit zero-knowledge checkpoint |
+| `osb knowledge capture --from-json event.json` | Capture from a pre-built JSON event file |
+| `osb knowledge pending [--task-id <id>]` | Show pending checkpoint status for active tasks |
+| `osb knowledge inspect --task-id <id>` | Show all captured events for a task |
+| `osb knowledge consolidate --task-id <id>` | Consolidate captured events into durable records |
+| `osb knowledge consolidate --task-id <id> --dry-run` | Preview consolidation without writing files |
+
+**Event types:** `decision`, `constraint`, `discovery`, `gotcha`, `assumption`,
+`assumption-invalidated`, `review-finding`, `qa-result`, `follow-up`
+
+**Scopes:** `temporary`, `task`, `component`, `global`, `discard`
+
+**Set `OSB_TASK_ID` as an environment variable to avoid repeating `--task-id` on every command.**
+
+#### Role-aware knowledge gate
+
+```sh
+# Check all role checkpoints and consolidation status for a task.
+osb gate knowledge inspect --task-id <id>
+```
+
+#### Durable records
+
+| Command | Description |
+| --- | --- |
+| `osb knowledge record task <name>` | Create a task knowledge record manually |
+| `osb knowledge record component <name>` | Create a component knowledge record manually |
+| `osb knowledge status` | Show durable knowledge directory status |
+
+#### Example workflow
+
+```sh
+# Architect captures a design decision.
+osb knowledge capture --task-id OSB-124 --role architect \
+  --type decision --scope global \
+  --summary "Use event-driven cache invalidation instead of polling"
+
+# Implementer captures a gotcha.
+osb knowledge capture --task-id OSB-124 --role implementer \
+  --type gotcha --scope component \
+  --summary "Lock timeout must stay below provider SLA" \
+  --file src/Cache/Invalidator.cs
+
+# Reviewer explicitly records no reusable findings.
+osb knowledge capture --task-id OSB-124 --role reviewer \
+  --none --reason-none "Trivial change — no recurring patterns found"
+
+# QA captures verified behavior.
+osb knowledge capture --task-id OSB-124 --role qa \
+  --type qa-result --summary "All 142 tests pass; invalidation latency < 50ms"
+
+# Check knowledge gate status.
+osb gate knowledge inspect --task-id OSB-124
+
+# Consolidate into durable records (auto-refreshes RagMonk in full mode).
+osb knowledge consolidate --task-id OSB-124
+```
+
+#### Full Mode — active-task knowledge via RagMonk
+
+When `intelligence.ragmonk.active_task_knowledge: true` (the default), each capture
+event triggers a RagMonk incremental index so later agents in the same task can query
+discoveries made by earlier agents through `osb context build`.
+
+```yaml
+intelligence:
+  provider: ragmonk
+  ragmonk:
+    active_task_knowledge: true   # index events for in-task retrieval
+    refresh_on_checkpoint: true   # index immediately on each capture
+```
 
 ### Intelligence (full mode)
 

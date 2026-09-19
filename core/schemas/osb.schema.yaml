@@ -78,6 +78,19 @@ properties:
               include_osb_knowledge:
                 type: boolean
                 default: true
+          active_task_knowledge:
+            type: boolean
+            default: true
+            description: |
+              When true, incremental knowledge events captured during an active task
+              are indexed and retrievable by RagMonk for later agents in the same task.
+              Requires Full Mode.
+          refresh_on_checkpoint:
+            type: boolean
+            default: true
+            description: |
+              When true, trigger a RagMonk incremental index after each knowledge
+              capture event so subsequent agents immediately benefit from new discoveries.
 
   paths:
     type: object
