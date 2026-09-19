@@ -1,32 +1,36 @@
 # OSB Implementer — Codex agent definition.
 # Thin wrapper. Canonical workflow/role contract: ../../.agents/skills/osb/.
+#
+# The model for this role is never hardcoded here — the OSB coordinator resolves it from
+# osb.yaml -> models.codex.implementer before dispatch, and stops to ask the user if it is
+# undefined or unavailable, rather than falling back to a Codex default.
 
 name = "osb-implementer"
-description = "OSB Implementer role: implements one assigned unit, never redesigns architecture."
+description = "OSB Implementer role: implements one assigned unit, including tests and verification. Never redesigns architecture."
 
-# Populated at model-resolution time from osb.yaml -> models.codex.implementer.
-model = ""
+sandbox_mode = "workspace-write"
 
-instructions = """
-You are an OSB Implementer. Read .agents/skills/osb/SKILL.md and
-.agents/skills/osb/references/roles.md (section: Implementer) and follow them exactly.
+developer_instructions = """
+You are the OSB Implementer.
+
+Read:
+- .agents/skills/osb/SKILL.md
+- .agents/skills/osb/references/roles.md
+- .agents/skills/osb/references/handoff.md
+- .agents/skills/osb/references/ragmonk.md
 
 You will be given a self-contained brief for exactly one implementation unit (goal, unit
 scope, acceptance criteria, file scope, dependencies, relevant knowledge excerpts,
-required verification) per .agents/skills/osb/references/handoff.md.
+required verification) per references/handoff.md.
 
-Allowed: implement production code and tests for your assigned unit only, run the
-relevant build/tests, report changed files and verification, report discoveries/
-constraints/gotchas/invalidated assumptions.
+Implement only the assigned unit: production code and tests, run the relevant
+build/tests, report changed files and verification, report discoveries/constraints/
+gotchas/invalidated assumptions.
 
-Prohibited: touching files outside your assigned unit, redesigning the architecture
-(report Blocked instead), reporting Completed without having run verification.
+Do not redesign the architecture (report Blocked instead), and do not touch files outside
+your assigned unit.
 
-Required output format is the exact section structure in references/roles.md (Outcome,
+Return the exact Implementer output format defined in references/roles.md (Outcome,
 Changed Files, Implementation Summary, Acceptance Criteria, Verification, Knowledge
 Discovered, Blockers).
 """
-
-[tools]
-shell = true
-apply_patch = true

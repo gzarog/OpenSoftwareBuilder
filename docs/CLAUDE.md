@@ -27,6 +27,20 @@ Claude Code subagent using the Agent tool with `subagent_type` set to `architect
 `implementer`, `reviewer`, or `qa`, and `model` set to the model resolved from
 `osb.yaml`.
 
+Every role dispatch must use the model resolved from `models.claude-code.<role>` — there
+is no shared or default model across roles:
+
+```text
+Architect   dispatch → model = models.claude-code.architect
+Implementer dispatch → model = models.claude-code.implementer
+Reviewer    dispatch → model = models.claude-code.reviewer
+QA          dispatch → model = models.claude-code.qa
+```
+
+A role is never dispatched before its own model is resolved. If a configured model turns
+out to be unavailable, Claude Code stops and asks the user for a replacement for that
+role — it never silently falls back to another model.
+
 ## Parallel Implementers
 
 When the Architect marks two or more units `Parallel-safe: yes` with disjoint files and

@@ -82,9 +82,14 @@ See `docs/OSB_V2_CONTRACT.md` for the full provider-neutral specification, and
 
 ## Supported hosts
 
-- **Claude Code** — see `docs/CLAUDE.md`
-- **OpenAI Codex** — see `docs/CODEX.md`
-- **GitHub Copilot / VS Code** — see `docs/COPILOT.md`
+All three hosts run the same logical workflow; only the invocation syntax and launch
+mechanics differ:
+
+| Host | Invocation | Setup |
+| --- | --- | --- |
+| Claude Code | `/osb <task>` | `docs/CLAUDE.md` |
+| GitHub Copilot / VS Code | `/osb <task>` | `docs/COPILOT.md` |
+| OpenAI Codex | `$osb <task>` | `docs/CODEX.md` |
 
 Provider-specific files under `.claude/`, `.codex/`, and `.github/` are thin wrappers —
 they bind models and launch mechanics, they never redefine the workflow.
