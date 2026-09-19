@@ -34,7 +34,10 @@ follow-up
 
 Events like "Reviewer started", "U1 completed", "tests passed", or "QA started" are
 execution state, not knowledge — they belong in `.osb/state/<task-id>.json`, never in a
-knowledge event.
+knowledge event. The same applies to quality-gate bookkeeping: review/QA scope, patch
+fingerprints, open `needs-evidence` requests, and unverified AC IDs (`quality.md`,
+`state.md`) are ordinary execution state — never send them to RagMonk as knowledge, even
+though they gate completion.
 
 ## Reporting knowledge (per role, during the task)
 

@@ -73,18 +73,46 @@ knowledge actually changed) causes unnecessary indexing overhead.
 5. Do not silently fall back to ad hoc repository search when `required: true` — that
    defeats the point of requiring RagMonk (consistent, indexed project memory).
 
-## Retrieval budgets (per role)
+## Retrieval budgets (per role) — initial defaults, not ceilings
 
-Strict, role-specific retrieval budgets keep context bounded. RagMonk already supports
-`max_chars`, `max_files`, `max_graph_nodes`, `limit`, and `max_depth` — apply these
-internal defaults without exposing every knob in `osb.yaml`:
+These role-specific budgets are **starting points for the cheap, common case, not evidence
+caps**. RagMonk already supports `max_chars`, `max_files`, `max_graph_nodes`, `limit`, and
+`max_depth` — apply these internal defaults without exposing every knob in `osb.yaml`:
 
-| Role | Default | Notes |
+| Role | Initial retrieval | Expand when necessary |
 | --- | --- | --- |
-| Architect | `max_chars: 6000`, `max_files: 6`, `max_graph_nodes: 25` | Use `ragmonk_explore` only when broad context is actually needed. |
-| Implementer | prefer `ragmonk_symbol` / `ragmonk_search limit=3`; if broader retrieval is necessary: `max_chars: 2500`, `max_files: 3`, `max_graph_nodes: 10` | Stay inside the unit capsule's scope. |
-| Reviewer | prefer targeted `ragmonk_impact` / `ragmonk_callers` / `ragmonk_callees`; `max_depth: 2`, `limit: 20` | No broad explore. |
-| QA | no RagMonk retrieval by default | Use only if an acceptance criterion specifically requires historical/spec knowledge. |
+| Architect | `ragmonk_explore(max_chars=6000, max_files=6, max_graph_nodes=25)` when broad context is needed | Query a named subsystem, contract, decision, or linked file; widen only the relevant dimension. |
+| Implementer | prefer `ragmonk_symbol` / `ragmonk_search(limit=3)`; bounded explore only if needed (`max_chars=2500, max_files=3, max_graph_nodes=10`) | Retrieve the exact caller/interface/behavior needed to safely implement its unit. |
+| Reviewer | targeted `ragmonk_impact` / `ragmonk_callers` / `ragmonk_callees` first (`max_depth=2, limit=20`) | Widen dependency scope when a changed public symbol or relevant edge lies outside the initial results. |
+| QA | no routine RagMonk lookup | Retrieve exact spec/source evidence only when an AC requires it. |
+
+See `quality.md` §Context expansion triggers for exactly when expansion is required — do
+not expand solely because more data exists.
+
+## Adaptive retrieval: escalation
+
+```text
+initial: ragmonk_explore(query, max_chars=6000, max_files=6)
+result:  evidence truncated / a critical interface is still unclear
+next:    ragmonk_symbol(precise_interface)
+         OR ragmonk_explore(narrow_query, max_chars=12000, max_files=10)
+stop:    once the needed requirement/contract is established, or a blocker is reported
+```
+
+The numbers above are illustrative, not a fixed second-stage default. Never repeatedly
+double the whole budget, and never repeatedly retrieve the same snippet — deduplicate by
+source path + location/content identity and keep useful source references, not a pasted
+retrieval transcript.
+
+`ragmonk_explore`'s response may include truncation **warnings** — inspect the actual
+returned warning/result rather than assuming every tool exposes a `truncated` boolean. For
+lexical/graph tools, hitting a requested limit is a cue to check adequacy, not proof that
+information is missing.
+
+If `ragmonk.required: true` and the required MCP/CLI access fails mid-task, block the
+affected phase — do not silently treat missing indexed evidence as adequate. Direct file
+inspection may supplement an available required RagMonk service; it does not replace a
+failed required one.
 
 ## Progressive retrieval policy
 
@@ -100,7 +128,8 @@ Every role follows this order, stopping as soon as it has what it needs:
 ```
 
 Avoid opening many full files first, and avoid a broad explore for every question — start
-narrow and widen only when the narrow query comes back empty or insufficient.
+narrow and widen only when the narrow query comes back empty or insufficient, or a
+`quality.md` §Context expansion trigger applies.
 
 ## During the task
 

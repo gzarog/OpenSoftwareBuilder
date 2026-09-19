@@ -16,26 +16,29 @@ responsibilities, prohibitions, and output formats:
 ```text
 /osb <task>
 
-0.  Resume check (compact task state)
+0.  Resume check (compact task state; revalidate fingerprint before trusting it)
 1.  Resolve host
 2.  Resolve models
 3.  Verify RagMonk
 4.  Load or create compact task state
-5.  Retrieve relevant knowledge (bounded, progressive)
-6.  Run Architect                          — checkpoint
+5.  Retrieve relevant knowledge (bounded, progressive, escalatable — see quality gate)
+6.  Run Architect                            — checkpoint
 7.  Run Implementer(s), min necessary fan-out — checkpoint
-8.  Run Reviewer                           — checkpoint
-9.  Repair loop if needed (delta only)     — checkpoint
-10. Run QA                                 — checkpoint
-11. Repair/design loop if needed (delta only)
-12. Consolidate knowledge                  — checkpoint
-13. Complete
+8.  Run Reviewer (intermediate, delta scope)  — checkpoint
+9.  Repair loop if needed (delta only)        — checkpoint
+10. MANDATORY final combined-change review    — checkpoint
+11. Run QA on every AC, final revision        — checkpoint
+12. Repair loop if needed; any repair re-runs steps 10 and 11 in full
+13. Consolidate knowledge                     — checkpoint
+14. Complete, only once the quality gate holds
 ```
 
 Execution state is persisted after every checkpoint so an interrupted task can resume
 from its current phase instead of restarting. Information moves forward between roles as
-references + compact state + deltas, never as full transcripts. Full detail:
-`.agents/skills/osb/references/workflow.md` and `.agents/skills/osb/references/state.md`.
+references + compact state + deltas, never as full transcripts — bounded by the quality
+gate below, which is deliberately the one place completion cannot be inferred from a
+narrow, cheap check. Full detail: `.agents/skills/osb/references/workflow.md` and
+`.agents/skills/osb/references/state.md`.
 
 ## Model resolution
 
@@ -58,11 +61,27 @@ rather than silently falling back to ad hoc search. Full detail:
 The Architect returns a design document; Implementer, Reviewer, and QA return compact
 YAML results (`status`, changed files/findings/AC verdicts, `knowledge`) instead of
 free-form narrative reports. An Implementer receives a **unit capsule** (its unit, files,
-acceptance criteria, constraints, bounded knowledge) rather than the full task and
-architecture. A review or QA failure sends only the affected finding/AC as a delta back to
-an Implementer or Architect — never a replay of the whole task. Full detail, including the
-per-role schemas: `.agents/skills/osb/references/handoff.md` and
-`.agents/skills/osb/references/roles.md`.
+acceptance criteria with their exact requirement text, constraints, interfaces, bounded
+knowledge) rather than the full task and architecture — compaction may omit irrelevant
+detail but must never drop a mandatory requirement. A review or QA failure sends only the
+affected finding/AC as a delta back to an Implementer or Architect — never a replay of the
+whole task, though the loop only closes on the full final review and QA passes, not the
+delta recheck alone. Any role may report `needs-evidence` with a named question instead of
+guessing over a gap. Full detail, including the per-role schemas:
+`.agents/skills/osb/references/handoff.md` and `.agents/skills/osb/references/roles.md`.
+
+## Quality gate
+
+Token budgets, compact handoffs, and delta repair loops are starting points for the cheap
+case, not evidence caps. A delta review pass (after one repair) is always intermediate — a
+**mandatory final combined-change review**, covering every unit and repair since the
+task's base revision against every acceptance criterion, must be clean before QA runs and
+again before completion. QA then independently verifies **every** AC — including ones that
+previously passed — on that same revision; `not-run`/`blocked`/`inconclusive` is never
+reported as `pass`. Both verdicts are tied to a patch fingerprint that covers uncommitted
+implementation content, not just a commit SHA; any later code/test/config change, whether
+from an explicit repair or discovered on resume, invalidates them and requires re-running
+the final review and QA. Full detail: `.agents/skills/osb/references/quality.md`.
 
 ## Incremental knowledge format
 
@@ -84,9 +103,11 @@ interrupted task resume from its current phase instead of restarting. Full detai
 
 ## Completion criteria
 
-A task is complete when every acceptance criterion has a QA verdict of Pass, the
-Reviewer's most recent pass is Clean, knowledge has been consolidated, and RagMonk has
-been given the opportunity to index the result.
+A task is complete when: the final combined-change review is Clean for the current patch
+fingerprint; every required acceptance criterion has an independent QA verdict of Pass on
+that same fingerprint; there are no open blocking findings or open evidence gaps;
+knowledge has been consolidated; and RagMonk has been given the opportunity to index the
+result. See `.agents/skills/osb/references/quality.md` §Completion gate.
 
 ## What OSB v2 deliberately does not have
 

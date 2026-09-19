@@ -26,7 +26,7 @@ trace lines only.
 **Required output (compact YAML, no narrative):**
 
 ```yaml
-status: done   # or: blocked
+status: done   # or: blocked, needs-evidence
 changed:
   - path/to/file.ext
 verify:
@@ -36,7 +36,11 @@ knowledge:
   - type: gotcha   # decision | constraint | discovery | gotcha | assumption | assumption-invalidated | follow-up
     summary: <one line>
 blocker: null   # one precise sentence, only when status is blocked
+context_request: null   # {question, reason, request, ac}, only when status is needs-evidence
 ```
 
 If anything in your brief is ambiguous or the spec is unworkable as given, report
-`blocked` with the precise question rather than guessing.
+`blocked` with the precise question rather than guessing. If your capsule is missing a
+needed interface, constraint, or dependency detail, report `needs-evidence` naming the
+exact question instead — never invent behavior or silently violate a stated constraint to
+keep going.

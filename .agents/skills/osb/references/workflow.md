@@ -5,7 +5,10 @@ on Claude Code, Codex, or Copilot specifics.
 
 The governing principle: **persist execution state frequently, persist durable knowledge
 selectively, pass only deltas between roles.** Information moves forward as references +
-compact state + deltas — never as full transcripts.
+compact state + deltas — never as full transcripts. That principle is bounded by
+`quality.md`: token budgets are starting points, not evidence caps, and completion
+requires a clean final combined-change review plus independent QA evidence for every AC
+on the final revision.
 
 ## Overview
 
@@ -16,7 +19,7 @@ Claude Code / Codex / VS Code Copilot
     /osb
       │
       ├── resume check (state.md)
-      ├── bounded RagMonk retrieval
+      ├── bounded, escalatable RagMonk retrieval
       │
       ▼
    Architect ── CP1
@@ -25,14 +28,20 @@ Claude Code / Codex / VS Code Copilot
  Implementer(s) ── CP2 / CP3
       │
       ▼
-   Reviewer ── CP4
+   Reviewer (intermediate, delta scope) ── CP4
       │
       ▼
  Repair (delta only) ── CP5
       │
       ▼
-      QA ── CP6
+   Reviewer (MANDATORY final combined-change review) ── CP4 (final scope)
       │
+      ▼
+      QA (every AC, final revision) ── CP6
+      │
+      ▼
+ repair? ── yes → back to repair, then re-run final review + QA
+      │ no
       ▼
  Knowledge consolidation ── CP7
       │
@@ -44,8 +53,12 @@ Claude Code / Codex / VS Code Copilot
 
 Before starting anything, check whether an active task state file exists for this task at
 `.osb/state/<task-id>.json` with `phase != complete`. If so, resume per `state.md` §Resume
-support instead of restarting from Architect. Do not rerun roles whose phase has already
-passed.
+support instead of restarting from Architect — but first recompute the current patch
+fingerprint and compare it against any persisted `review`/`qa` fingerprints
+(`quality.md` §Fingerprinting). If they differ (e.g. the working tree changed outside this
+run), the persisted review/QA verdicts are stale: re-enter at step 9 or 10 rather than
+resuming at completion. Do not rerun roles whose phase has already passed and whose
+verdicts are still fresh.
 
 ## Step 1 — Resolve host
 
@@ -85,7 +98,9 @@ Query RagMonk (when available) for material relevant to `<task>`, following the
 progressive retrieval order and per-role budgets in `ragmonk.md`: previous architectural
 decisions touching the same area, component knowledge, related completed tasks, standing
 gotchas/constraints, and unresolved follow-ups. Summarize into a short knowledge excerpt —
-never dump the whole knowledge base into the Architect's context.
+never dump the whole knowledge base into the Architect's context. These are initial
+defaults, not ceilings — escalate per `ragmonk.md` §Adaptive retrieval when a
+`quality.md` §Context expansion trigger applies.
 
 ## Step 6 — Architecture (CP1)
 
@@ -116,22 +131,26 @@ multiple Implementers for tiny adjacent changes. `osb.yaml` →
 only for a concrete architectural reason.
 
 Dispatch each Implementer with exactly its unit capsule (`handoff.md`), never the full
-architecture or other units' outputs. On each unit's completion, save CP2 (or CP3 if
+architecture or other units' outputs. If an Implementer reports `needs-evidence`, supply
+only the requested evidence and let it continue (`quality.md` §Context expansion
+triggers) — do not treat that as a failure. On each unit's completion, save CP2 (or CP3 if
 blocked) and advance the knowledge watermark if new knowledge was reported.
 
-## Step 8 — Review (CP4)
+## Step 8 — Review, intermediate/delta scope (CP4)
 
 ```text
 Implementer(s)
       │
       ▼
-   Reviewer
+   Reviewer (scope: delta if this is a repair recheck, else the initial combined diff)
 ```
 
-One Reviewer reviews the combined diff from all units in this pass, checked against the
-Architect's acceptance criteria, receiving only what `handoff.md` §Reviewer dispatch
-specifies. The Reviewer must be a fresh context, independent of any Implementer's session
-state. Save CP4 on completion.
+One Reviewer reviews the diff from all units in this pass, checked against the relevant
+acceptance criteria, receiving only what `handoff.md` §Reviewer dispatch specifies. The
+Reviewer must be a fresh context, independent of any Implementer's session state. This
+pass — even the first one, before any finding exists — is **not** a substitute for the
+mandatory final combined-change review in step 10; it establishes only that this pass's
+scope is clean. Save CP4 on completion.
 
 ## Step 9 — Repair loop (review, CP5)
 
@@ -148,54 +167,87 @@ Reviewer
 Route each blocking finding to the Implementer who owns the affected files, as a delta —
 never the whole task. Non-blocking findings may be recorded as knowledge
 (`review-finding`) without necessarily blocking QA, at the Reviewer's judgment. Repeat
-until the Reviewer reports `clean`. Save CP5 after each repair.
+until the Reviewer reports `clean` on this delta scope. Save CP5 after each repair. Once
+clean, proceed to step 10 — do not skip straight to QA.
 
-## Step 10 — QA (CP6)
+## Step 10 — Final combined-change review (mandatory, CP4 final scope)
 
 ```text
-Reviewer clean
+no open blocking findings
+      │
+      ▼
+   Reviewer — scope: final-combined-change
+```
+
+Once the delta scope is clean, dispatch the Reviewer once more over the **complete**
+change since the task's base revision: all units, all repairs, every changed file, checked
+against every acceptance criterion and significant regression/security surface. Start from
+`git diff --stat <base>`, enumerate changed files, inspect relevant patches in manageable
+chunks, and expand to related files/symbols only when impact warrants it — this is not a
+whole-repository read or a single giant diff prompt (`quality.md` §Final combined-change
+review gate). Compute the current patch fingerprint (`quality.md` §Fingerprinting,
+`state.md`) and record it as `review.reviewed_revision` alongside `review.scope:
+final-combined-change`. If this pass finds a blocking issue, return to step 9 for that
+delta, then re-run this step against the new fingerprint. Save CP4 (final scope) on a
+clean result.
+
+## Step 11 — QA, every AC on the final revision (CP6)
+
+```text
+final combined-change review clean
       │
       ▼
       QA
 ```
 
-QA runs only after a clean review, receiving only what `handoff.md` §QA dispatch
-specifies (never the Architect/Implementer/Reviewer transcripts). QA checks every
-acceptance criterion independently — it does not trust prior verification claims, it
-re-runs them, with minimal/quiet command output (see §Build/test output below). Save CP6.
+QA runs only after the **final combined-change review** — not a delta pass — reports
+`clean` for the current fingerprint, receiving only what `handoff.md` §QA dispatch
+specifies (never the Architect/Implementer/Reviewer transcripts). QA independently checks
+**every** acceptance criterion, including ones that previously passed, with minimal/quiet
+command output (see §Build/test output below) — it does not trust prior verification
+claims, it re-runs them. `not-run`/`blocked`/`inconclusive` is never reported as `pass`
+(`quality.md` §Final-revision QA gate). Save CP6, including the QA fingerprint and any
+unverified AC IDs.
 
-## Step 11 — Repair/design loop (QA)
+## Step 12 — Repair/design loop (QA)
 
 Implementation defect (the design was right, the code has a bug):
 
 ```text
-QA → Implementer (delta) → Reviewer (delta) → QA
+QA → Implementer (delta) → step 10 (final review) → step 11 (QA)
 ```
 
 Architecture/specification defect (an assumption in the design was wrong):
 
 ```text
-QA → Architect (delta) → Implementer → Reviewer → QA
+QA → Architect (delta) → Implementer → step 10 (final review) → step 11 (QA)
 ```
 
 QA decides which loop applies based on whether the failure traces to an incorrect
-implementation of a correct spec, or an incorrect/incomplete spec. Every hop carries only
-the failed AC, the affected unit, the relevant files, and the failure evidence — not a
-full replay.
+implementation of a correct spec, or an incorrect/incomplete spec. Every repair hop
+carries only the failed AC, the affected unit, the relevant files, and the failure
+evidence — not a full replay. The loop never closes on a delta re-review or a re-check of
+only the one failed AC: any repair invalidates the prior final review and QA verdicts
+(`quality.md` §Staleness), so both step 10 and step 11 run again, in full, against the new
+fingerprint before the loop can close.
 
-## Step 12 — Knowledge consolidation (CP7)
+## Step 13 — Knowledge consolidation (CP7)
 
-After QA reports pass on every acceptance criterion, consolidate per `knowledge.md`: write
-one immutable task record, update touched component records, and let RagMonk index them
-only because durable knowledge actually changed (`ragmonk.md` §Refresh policy). Save CP7.
+After QA reports pass on every required acceptance criterion against the final revision,
+consolidate per `knowledge.md`: write one immutable task record, update touched component
+records, and let RagMonk index them only because durable knowledge actually changed
+(`ragmonk.md` §Refresh policy). Save CP7.
 
-## Step 13 — Complete
+## Step 14 — Complete
 
-Report completion to the user: task summary, changed files, acceptance criteria status,
-and the task-record path. If the host exposes usage figures, optionally record proxies for
-token efficiency (input/output tokens or prompt/diff/tool-output chars per phase, RagMonk
-chars retrieved, Implementers spawned, repair-loop counts) — this is advisory measurement,
-never a gate on completion. The workflow instance ends here.
+Before reporting completion, confirm the completion gate in `quality.md` §Completion gate:
+final review and QA fingerprints match the current patch fingerprint, no open blocking
+findings or evidence gaps, every required AC independently `pass`, knowledge consolidated.
+Then report to the user: task summary, changed files, acceptance criteria status, and the
+task-record path. If the host exposes usage figures, optionally record proxies for token
+efficiency (input/output tokens or prompt/diff/tool-output chars per phase, RagMonk chars
+retrieved, Implementers spawned, repair-loop counts) — this is advisory measurement, never
+a gate on completion. The workflow instance ends here.
 
 ## Build/test output
 

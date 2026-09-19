@@ -45,6 +45,27 @@ CANONICAL_REFERENCES = (
     "references/knowledge.md",
     "references/ragmonk.md",
     "references/state.md",
+    "references/quality.md",
+)
+
+# Phrasing that implied a delta/repaired-diff review pass was sufficient by itself,
+# without a mandatory final combined-change review. Must not reappear anywhere.
+FORBIDDEN_STALE_REVIEW_PHRASES = (
+    "the repaired diff only, not the whole task, once repaired",
+    "runs again on the repaired diff only. repeat until",
+)
+
+# Files (relative to ROOT) that must document the quality-guardrails invariants.
+QUALITY_CANONICAL_FILES = (
+    ".agents/skills/osb/references/workflow.md",
+    ".agents/skills/osb/references/roles.md",
+    ".agents/skills/osb/references/handoff.md",
+    ".agents/skills/osb/references/quality.md",
+)
+FINGERPRINT_FILES = (
+    ".agents/skills/osb/references/state.md",
+    ".agents/skills/osb/references/workflow.md",
+    ".agents/skills/osb/references/quality.md",
 )
 
 # Subagent-facing content must be self-contained: no reads of the full canonical skill or
@@ -285,6 +306,101 @@ def check_size_guards() -> None:
         )
 
 
+def check_quality_contract() -> None:
+    """The quality-guardrails invariants (final review/QA gates, evidence escalation,
+    staleness/fingerprinting) must be documented in the canonical reference files, and the
+    old unqualified 'repaired diff only' phrasing must not have crept back in anywhere."""
+
+    for rel in QUALITY_CANONICAL_FILES:
+        path = ROOT / rel
+        if not path.is_file():
+            continue  # already reported by check_canonical_skill
+        text = read(path).lower()
+        if "final combined-change review" not in text:
+            fail(f"{path.relative_to(ROOT)}: 'final combined-change review' gate not documented")
+        if "needs-evidence" not in text:
+            fail(f"{path.relative_to(ROOT)}: 'needs-evidence' evidence-escalation status not documented")
+
+    for rel in FINGERPRINT_FILES:
+        path = ROOT / rel
+        if not path.is_file():
+            continue
+        if "fingerprint" not in read(path).lower():
+            fail(f"{path.relative_to(ROOT)}: patch fingerprint/staleness rule not documented")
+
+    reviewer_agent_paths = [
+        ROOT / ".claude/agents/reviewer.md",
+        ROOT / ".github/agents/reviewer.agent.md",
+    ]
+    for path in reviewer_agent_paths:
+        if path.is_file() and "final combined-change review" not in read(path).lower():
+            fail(f"{path.relative_to(ROOT)}: mandatory final review not documented for Reviewer")
+
+    codex_reviewer = ROOT / ".codex/agents/reviewer.toml"
+    if codex_reviewer.is_file():
+        try:
+            data = tomllib.loads(read(codex_reviewer))
+            instructions = data.get("developer_instructions", "").lower()
+            if "final combined-change review" not in instructions:
+                fail(f"{codex_reviewer.relative_to(ROOT)}: mandatory final review not documented for Reviewer")
+        except tomllib.TOMLDecodeError:
+            pass  # already reported by check_codex_agents
+
+    needs_evidence_roles = ("implementer", "reviewer", "qa")
+    for role in needs_evidence_roles:
+        claude_path = ROOT / f".claude/agents/{role}.md"
+        if claude_path.is_file() and "needs-evidence" not in read(claude_path).lower():
+            fail(f"{claude_path.relative_to(ROOT)}: 'needs-evidence' status not documented")
+
+        copilot_path = ROOT / f".github/agents/{role}.agent.md"
+        if copilot_path.is_file() and "needs-evidence" not in read(copilot_path).lower():
+            fail(f"{copilot_path.relative_to(ROOT)}: 'needs-evidence' status not documented")
+
+        codex_path = ROOT / f".codex/agents/{role}.toml"
+        if codex_path.is_file():
+            try:
+                data = tomllib.loads(read(codex_path))
+                instructions = data.get("developer_instructions", "").lower()
+                if "needs-evidence" not in instructions:
+                    fail(f"{codex_path.relative_to(ROOT)}: 'needs-evidence' status not documented")
+            except tomllib.TOMLDecodeError:
+                pass  # already reported by check_codex_agents
+
+    all_role_paths: list[Path] = []
+    for role in ROLES:
+        all_role_paths.append(ROOT / f".claude/agents/{role}.md")
+        all_role_paths.append(ROOT / f".github/agents/{role}.agent.md")
+    all_role_paths.append(ROOT / ".agents/skills/osb/references/roles.md")
+    all_role_paths.append(ROOT / ".agents/skills/osb/references/handoff.md")
+
+    for path in all_role_paths:
+        if not path.is_file():
+            continue
+        text_lower = read(path).lower()
+        for phrase in FORBIDDEN_STALE_REVIEW_PHRASES:
+            if phrase in text_lower:
+                fail(
+                    f"{path.relative_to(ROOT)}: contains stale unqualified phrase "
+                    f"'{phrase}' — a delta/repaired-diff pass must not read as sufficient "
+                    "by itself; the mandatory final combined-change review must be named"
+                )
+
+    for role in ROLES:
+        codex_path = ROOT / f".codex/agents/{role}.toml"
+        if codex_path.is_file():
+            try:
+                data = tomllib.loads(read(codex_path))
+                instructions = data.get("developer_instructions", "").lower()
+            except tomllib.TOMLDecodeError:
+                continue
+            for phrase in FORBIDDEN_STALE_REVIEW_PHRASES:
+                if phrase in instructions:
+                    fail(
+                        f"{codex_path.relative_to(ROOT)}: contains stale unqualified phrase "
+                        f"'{phrase}'"
+                    )
+
+
 def check_legacy_dirs_absent() -> None:
     for name in LEGACY_DIRS:
         path = ROOT / name
@@ -302,6 +418,7 @@ def main() -> int:
     check_legacy_dirs_absent()
     check_subagents_self_contained()
     check_compact_and_delta_docs()
+    check_quality_contract()
     check_size_guards()
 
     if warnings:

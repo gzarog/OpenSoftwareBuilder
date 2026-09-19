@@ -48,8 +48,12 @@ ragmonk:
 | `refresh_after_knowledge_change` | Ask RagMonk to refresh its index after a checkpoint actually appends new knowledge events, rather than relying solely on RagMonk's own watch mode. A checkpoint with no new knowledge never triggers this. (Previously named `refresh_after_checkpoint` — that name is deprecated.) |
 
 Retrieval is also budgeted per role (Architect gets the widest budget, QA none by
-default) and follows a progressive narrow-to-wide order — see
-`.agents/skills/osb/references/ragmonk.md` §Retrieval budgets.
+default) and follows a progressive narrow-to-wide order. These are **initial defaults for
+the cheap, common case, not evidence caps** — a role facing truncated evidence, a hidden
+required interface, or another named gap escalates within its role, rather than accepting
+incomplete evidence as an answer. See
+`.agents/skills/osb/references/ragmonk.md` §Retrieval budgets and
+`.agents/skills/osb/references/quality.md` §Context expansion triggers.
 
 The shortest valid config (all other fields use their defaults):
 
