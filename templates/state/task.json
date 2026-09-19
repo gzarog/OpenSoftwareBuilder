@@ -1,0 +1,18 @@
+{
+  "task_id": "OSB-YYYY-MMDD-NNN",
+  "goal": "<one-line task goal>",
+  "phase": "architecture",
+  "architecture_checkpoint": null,
+  "acceptance": {},
+  "units": {},
+  "review": {
+    "status": "pending",
+    "open": [],
+    "resolved": []
+  },
+  "qa": {
+    "status": "pending",
+    "failed": []
+  },
+  "knowledge_watermark": null
+}

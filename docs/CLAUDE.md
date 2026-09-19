@@ -43,10 +43,12 @@ role — it never silently falls back to another model.
 
 ## Parallel Implementers
 
-When the Architect marks two or more units `Parallel-safe: yes` with disjoint files and
-no unmet dependency, Claude Code dispatches the corresponding Implementer agents together
-in a single message with multiple Agent tool calls, per its own guidance on parallel,
-independent tool calls.
+Claude Code defaults to a single Implementer. When the Architect marks two or more units
+`Parallel-safe: yes` with disjoint files and no unmet dependency, and splitting genuinely
+helps, it dispatches the corresponding Implementer agents together in a single message
+with multiple Agent tool calls — up to `osb.yaml` → `execution.max_parallel_implementers`
+(default 2). Each Implementer receives only its own unit capsule, never another
+Implementer's output or the full architecture.
 
 ## RagMonk
 

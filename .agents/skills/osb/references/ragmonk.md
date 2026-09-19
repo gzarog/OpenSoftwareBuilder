@@ -24,8 +24,8 @@ ragmonk_status
 ```
 
 Use `ragmonk_status` (or CLI equivalent, e.g. `ragmonk status`) for the startup
-verification in `SKILL.md` step 3. Use `ragmonk_search` / `ragmonk_explore` for the
-bounded knowledge retrieval in step 4. Use `ragmonk_symbol` / `ragmonk_callers` /
+verification in `SKILL.md`. Use `ragmonk_search` / `ragmonk_explore` for the bounded
+knowledge retrieval before architecture. Use `ragmonk_symbol` / `ragmonk_callers` /
 `ragmonk_callees` / `ragmonk_impact` for targeted structural queries during architecture,
 implementation, and review (in place of a custom code-analysis engine).
 
@@ -36,7 +36,7 @@ ragmonk:
   enabled: true
   required: true
   retrieve_before_architecture: true
-  refresh_after_checkpoint: true
+  refresh_after_knowledge_change: true
 ```
 
 | Field | Effect |
@@ -44,8 +44,12 @@ ragmonk:
 | `enabled: false` | RagMonk is not used at all; skip verification and retrieval. |
 | `enabled: true, required: false` | Attempt verification; on failure, warn once and continue without RagMonk-backed retrieval. |
 | `enabled: true, required: true` | Attempt verification; on failure, **stop the OSB workflow before Architect is dispatched.** |
-| `retrieve_before_architecture: true` | Run the step-4 knowledge retrieval before dispatching the Architect. |
-| `refresh_after_checkpoint: true` | After appending knowledge events, request a RagMonk index refresh rather than waiting for watch-mode. |
+| `retrieve_before_architecture: true` | Run bounded knowledge retrieval before dispatching the Architect. |
+| `refresh_after_knowledge_change: true` | After a checkpoint appends durable knowledge events, request a RagMonk index refresh rather than waiting for watch-mode. A checkpoint with no new knowledge never triggers this — see `knowledge.md` §Watermark. |
+
+This field was previously named `refresh_after_checkpoint`; that name is deprecated and
+must not be reintroduced — refreshing on every checkpoint (rather than only when durable
+knowledge actually changed) causes unnecessary indexing overhead.
 
 ## Verification procedure
 
@@ -69,15 +73,44 @@ ragmonk:
 5. Do not silently fall back to ad hoc repository search when `required: true` — that
    defeats the point of requiring RagMonk (consistent, indexed project memory).
 
+## Retrieval budgets (per role)
+
+Strict, role-specific retrieval budgets keep context bounded. RagMonk already supports
+`max_chars`, `max_files`, `max_graph_nodes`, `limit`, and `max_depth` — apply these
+internal defaults without exposing every knob in `osb.yaml`:
+
+| Role | Default | Notes |
+| --- | --- | --- |
+| Architect | `max_chars: 6000`, `max_files: 6`, `max_graph_nodes: 25` | Use `ragmonk_explore` only when broad context is actually needed. |
+| Implementer | prefer `ragmonk_symbol` / `ragmonk_search limit=3`; if broader retrieval is necessary: `max_chars: 2500`, `max_files: 3`, `max_graph_nodes: 10` | Stay inside the unit capsule's scope. |
+| Reviewer | prefer targeted `ragmonk_impact` / `ragmonk_callers` / `ragmonk_callees`; `max_depth: 2`, `limit: 20` | No broad explore. |
+| QA | no RagMonk retrieval by default | Use only if an acceptance criterion specifically requires historical/spec knowledge. |
+
+## Progressive retrieval policy
+
+Every role follows this order, stopping as soon as it has what it needs:
+
+```text
+1. current task state (state.md)
+2. exact symbol lookup
+3. lexical search
+4. targeted graph/impact query
+5. bounded explore
+6. full file read only if necessary
+```
+
+Avoid opening many full files first, and avoid a broad explore for every question — start
+narrow and widen only when the narrow query comes back empty or insufficient.
+
 ## During the task
 
-Any role may issue targeted RagMonk queries beyond the initial step-4 retrieval — e.g. an
-Implementer checking callers of a function it's about to change, or a Reviewer checking
-blast radius. These use the same MCP/CLI access rules above.
+Any role may issue targeted RagMonk queries beyond the initial pre-architecture retrieval
+— e.g. an Implementer checking callers of a function it's about to change, or a Reviewer
+checking blast radius — within its role's budget above.
 
 ## After the task
 
-Per `knowledge.md`, append incremental knowledge events as the task proceeds and let
-RagMonk index them (via watch mode or an explicit refresh per `refresh_after_checkpoint`).
-On final consolidation, ensure RagMonk indexes the new task and component records so future
-`/osb` runs can retrieve them.
+Per `knowledge.md`, append incremental knowledge events only when a checkpoint produces
+new durable knowledge, and let RagMonk index them (via watch mode or an explicit refresh
+per `refresh_after_knowledge_change`). On final consolidation, ensure RagMonk indexes the
+new task and component records so future `/osb` runs can retrieve them.

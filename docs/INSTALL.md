@@ -47,19 +47,22 @@ models:
 If you leave a role blank, `/osb` will ask for it the first time it's needed and can
 persist your answer back into this file.
 
-## 4. Set up the knowledge directory
+## 4. Set up `.osb/`
 
 ```text
 .osb/
+├── state/          ephemeral, per-task execution state — see templates/state/task.json
 └── knowledge/
     ├── events/
     ├── tasks/
     └── components/
 ```
 
-These directories are created automatically the first time `/osb` records knowledge, but
-you can create them up front. Commit `.osb/knowledge/` to version control — it's durable
-project memory, not scratch state.
+These directories are created automatically the first time `/osb` checkpoints or records
+knowledge, but you can create them up front. Commit `.osb/knowledge/` to version control
+— it's durable project memory, not scratch state. `.osb/state/` is safe to leave
+untracked (or gitignore) if you don't want to commit ephemeral per-task progress; it isn't
+required for resumability within a single working tree.
 
 ## 5. Set up RagMonk
 

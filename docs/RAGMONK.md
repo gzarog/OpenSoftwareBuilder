@@ -37,7 +37,7 @@ ragmonk:
   enabled: true
   required: true
   retrieve_before_architecture: true
-  refresh_after_checkpoint: true
+  refresh_after_knowledge_change: true
 ```
 
 | Field | Meaning |
@@ -45,7 +45,11 @@ ragmonk:
 | `enabled` | Whether OSB uses RagMonk at all. |
 | `required` | If `true`, `/osb` stops before dispatching the Architect when RagMonk is unreachable or this repository isn't indexed, instead of silently continuing without it. |
 | `retrieve_before_architecture` | Run bounded knowledge retrieval before the Architect stage. |
-| `refresh_after_checkpoint` | Ask RagMonk to refresh its index after OSB appends knowledge events, rather than relying solely on RagMonk's own watch mode. |
+| `refresh_after_knowledge_change` | Ask RagMonk to refresh its index after a checkpoint actually appends new knowledge events, rather than relying solely on RagMonk's own watch mode. A checkpoint with no new knowledge never triggers this. (Previously named `refresh_after_checkpoint` — that name is deprecated.) |
+
+Retrieval is also budgeted per role (Architect gets the widest budget, QA none by
+default) and follows a progressive narrow-to-wide order — see
+`.agents/skills/osb/references/ragmonk.md` §Retrieval budgets.
 
 The shortest valid config (all other fields use their defaults):
 
@@ -85,8 +89,9 @@ ragmonk daemon stop
 
 With watch mode running, knowledge events OSB appends to
 `.osb/knowledge/events/<task-id>.jsonl` are picked up automatically. Without it, set
-`ragmonk.refresh_after_checkpoint: true` so OSB requests an explicit refresh after each
-checkpoint instead.
+`ragmonk.refresh_after_knowledge_change: true` so OSB requests an explicit refresh
+whenever a checkpoint actually adds new knowledge (never on a checkpoint that adds none —
+see `.agents/skills/osb/references/knowledge.md` §Watermark).
 
 ## Failure behavior
 

@@ -1,46 +1,24 @@
-# OpenSoftwareBuilder (OSB) — Copilot Instructions
+# OSB
 
-This repository ships **OpenSoftwareBuilder v2**, a provider-neutral
-Architect → Implement → Review → QA workflow with RagMonk-backed project memory.
+For `/osb <task>` (or "run OSB" / "use the OSB workflow"), use
+`.agents/skills/osb/SKILL.md` as the single source of truth for the lifecycle, the four
+roles, handoffs, model resolution, RagMonk usage, execution state, and knowledge capture.
+Follow it exactly — do not reinterpret, shortcut, or duplicate its policy here.
 
-When a user asks you (Copilot) to run `/osb <task>`, or asks to "run OSB" / "use the OSB
-workflow" for a task, do the following:
+Host: `copilot`. Resolve each role's model from `osb.yaml` →
+`models.copilot.{architect,implementer,reviewer,qa}`; stop and ask the user per
+`SKILL.md` §"Model resolution" if any is missing. Never dispatch a role before its own
+model is resolved.
 
-1. Read the canonical, provider-neutral workflow at `.agents/skills/osb/SKILL.md` and its
-   `references/*.md` files. That is the single source of truth for the lifecycle, the
-   four roles (Architect, Implementer, Reviewer, QA), the handoff contract, model
-   resolution, RagMonk usage, and knowledge capture. Follow it exactly — do not
-   reinterpret or shortcut it.
-2. Use the host identity `copilot` when resolving `osb.yaml` → `models.copilot.*`. If any
-   of `architect`, `implementer`, `reviewer`, `qa` is missing a model, stop and ask the
-   user per `SKILL.md` §"Model resolution" before doing any work.
-3. Launch each role using the corresponding definition in `.github/agents/`
-   (`architect.agent.md`, `implementer.agent.md`, `reviewer.agent.md`, `qa.agent.md`),
-   binding each dispatch to its own resolved model — there is no shared or default model
-   across roles:
+Launch each role from `.github/agents/` (`architect.agent.md`, `implementer.agent.md`,
+`reviewer.agent.md`, `qa.agent.md`) with a compact, self-contained dispatch brief per
+`.agents/skills/osb/references/handoff.md` — the role has no memory of this conversation
+and does not read OSB policy files itself.
 
-   ```text
-   invoke Architect   → model = models.copilot.architect
-   invoke Implementer → model = models.copilot.implementer
-   invoke Reviewer    → model = models.copilot.reviewer
-   invoke QA          → model = models.copilot.qa
-   ```
+Use RagMonk MCP tools when available, CLI as fallback, per
+`.agents/skills/osb/references/ragmonk.md`.
 
-   Never dispatch a role before its own model is resolved; if a configured model is
-   unavailable, stop and ask the user for a replacement for that role only. Each dispatch
-   must be a self-contained brief per `.agents/skills/osb/references/handoff.md` — the
-   role has no memory of this conversation.
-4. Use RagMonk via its MCP tools when configured in this environment; fall back to the
-   RagMonk CLI only if MCP is unavailable. Follow
-   `.agents/skills/osb/references/ragmonk.md`, including stopping the workflow when
-   `osb.yaml` sets `ragmonk.required: true` and RagMonk is unreachable.
-5. Persist any newly-resolved model configuration back into `osb.yaml` when asked to.
-6. Consolidate knowledge into `.osb/knowledge/` per
-   `.agents/skills/osb/references/knowledge.md` once QA passes.
+`.github/agents/*.agent.md`, `.claude/`, and `.codex/` are thin wrappers only — they never
+contain workflow policy of their own.
 
-Provider-specific files in this repository (`.github/agents/*.agent.md`, `.claude/`,
-`.codex/`) are thin wrappers only. They must never contain workflow policy of their own —
-that always lives in `.agents/skills/osb/`.
-
-For general repository work not related to `/osb`, no special instructions apply beyond
-normal good practice for this codebase.
+For general repository work not related to `/osb`, no special instructions apply.

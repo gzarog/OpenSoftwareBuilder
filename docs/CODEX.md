@@ -13,10 +13,13 @@ Copy into your project:
 osb.yaml                  (with models.codex.* filled in, or left blank to be prompted)
 ```
 
-Each `.codex/agents/*.toml` file is the smallest possible launcher: it names the agent,
-sets its native `sandbox_mode`, and points Codex at the canonical role definition in
-`.agents/skills/osb/references/roles.md` via `developer_instructions`. It does not
-duplicate the workflow, and it never hardcodes a model — see "Model binding" below.
+Each `.codex/agents/*.toml` file is a small, self-contained launcher: it names the agent,
+sets its native `sandbox_mode`, and inlines that role's contract (allowed/prohibited
+actions and required output schema) directly into `developer_instructions`, derived from
+the canonical `.agents/skills/osb/references/roles.md`. The agent does not read
+`SKILL.md` or the shared reference files itself at dispatch time — it starts with no
+memory of any prior conversation and needs no extra file reads to know its job. It never
+hardcodes a model — see "Model binding" below.
 
 ## Invocation
 

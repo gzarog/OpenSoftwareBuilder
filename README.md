@@ -114,6 +114,12 @@ models:
     reviewer: <model id>
     qa: <model id>
 
+execution:
+  max_parallel_implementers: 2
+  compact_handoffs: true
+  checkpoint_state: true
+  delta_repairs: true
+
 knowledge:
   enabled: true
   incremental: true
@@ -123,7 +129,7 @@ ragmonk:
   enabled: true
   required: true
   retrieve_before_architecture: true
-  refresh_after_checkpoint: true
+  refresh_after_knowledge_change: true
 ```
 
 OSB never invents a model for a role left blank — it asks once and can persist the
@@ -143,6 +149,14 @@ index/retrieval layer over them:
 ```
 
 See `docs/RAGMONK.md` and `.agents/skills/osb/references/knowledge.md`.
+
+## Execution state
+
+Task progress — current phase, unit status, open findings, failed acceptance criteria —
+is persisted separately as compact JSON at `.osb/state/<task-id>.json`. It is never
+treated as knowledge or indexed by RagMonk, and it's what lets an interrupted `/osb` run
+resume from its current phase instead of restarting. See
+`.agents/skills/osb/references/state.md`.
 
 ## License
 
