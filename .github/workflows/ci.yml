@@ -7,41 +7,43 @@ on:
     branches: [main]
 
 jobs:
-  test:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.24'
-      - run: go vet ./...
-      - run: go test ./tests/unit/... -v
-      - run: go build -o osb ./cmd/osb/
-
-  build:
-    needs: test
+  structure:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64, arm64]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.24'
-      - name: Build
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
+      - name: Verify required OSB v2 files exist
         run: |
-          ext=""
-          if [ "$GOOS" = "windows" ]; then ext=".exe"; fi
-          go build -ldflags "-X github.com/gzarog/opensoftwarebuilder/internal/cli.Version=${{ github.sha }}" -o osb-${GOOS}-${GOARCH}${ext} ./cmd/osb/
-      - uses: actions/upload-artifact@v4
-        with:
-          name: osb-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: osb-*
+          set -euo pipefail
+          required_files=(
+            ".agents/skills/osb/SKILL.md"
+            ".agents/skills/osb/references/workflow.md"
+            ".agents/skills/osb/references/roles.md"
+            ".agents/skills/osb/references/handoff.md"
+            ".agents/skills/osb/references/knowledge.md"
+            ".agents/skills/osb/references/ragmonk.md"
+            ".claude/skills/osb/SKILL.md"
+            ".claude/agents/architect.md"
+            ".claude/agents/implementer.md"
+            ".claude/agents/reviewer.md"
+            ".claude/agents/qa.md"
+            ".codex/agents/architect.toml"
+            ".codex/agents/implementer.toml"
+            ".codex/agents/reviewer.toml"
+            ".codex/agents/qa.toml"
+            ".github/copilot-instructions.md"
+            ".github/agents/architect.agent.md"
+            ".github/agents/implementer.agent.md"
+            ".github/agents/reviewer.agent.md"
+            ".github/agents/qa.agent.md"
+            "templates/osb.yaml"
+            "templates/knowledge/task.md"
+            "templates/knowledge/component.md"
+          )
+          missing=0
+          for f in "${required_files[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "Missing required file: $f"
+              missing=1
+            fi
+          done
+          exit "$missing"
