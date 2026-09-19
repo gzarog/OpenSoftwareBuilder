@@ -1,9 +1,0 @@
-id: meson
-name: "Meson"
-toolchain: cpp
-detect:
-  files: ["meson.build"]
-commands:
-  restore: { argv: [meson, setup, build] }
-  build: { argv: [meson, compile, -C, build] }
-  test: { argv: [meson, test, -C, build] }

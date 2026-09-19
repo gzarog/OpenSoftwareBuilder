@@ -1,0 +1,32 @@
+# OSB v2 configuration. Copy this file to the project root as `osb.yaml`.
+version: 2
+
+models:
+  claude-code:
+    architect:
+    implementer:
+    reviewer:
+    qa:
+
+  codex:
+    architect:
+    implementer:
+    reviewer:
+    qa:
+
+  copilot:
+    architect:
+    implementer:
+    reviewer:
+    qa:
+
+knowledge:
+  enabled: true
+  incremental: true
+  path: .osb/knowledge
+
+ragmonk:
+  enabled: true
+  required: true
+  retrieve_before_architecture: true
+  refresh_after_checkpoint: true

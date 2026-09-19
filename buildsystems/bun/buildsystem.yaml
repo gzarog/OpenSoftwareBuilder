@@ -1,9 +1,0 @@
-id: bun
-name: "Bun"
-toolchain: node
-detect:
-  files: ["bun.lockb", "bun.lock"]
-commands:
-  restore: { argv: [bun, install] }
-  build: { argv: [bun, run, build] }
-  test: { argv: [bun, test] }
