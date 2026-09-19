@@ -23,6 +23,19 @@ the canonical `SKILL.md` §"Model resolution" before dispatching anything. If th
 approves persisting the answer, write it back into `osb.yaml`'s `models.claude-code`
 block, preserving all other content.
 
+**Invariant:** each of the four role dispatches uses its own model, independently:
+
+```text
+Architect   → models.claude-code.architect
+Implementer → models.claude-code.implementer
+Reviewer    → models.claude-code.reviewer
+QA          → models.claude-code.qa
+```
+
+Never dispatch a role before its own model is resolved, and never substitute another
+role's model or a Claude Code default when a configured model turns out to be
+unavailable — stop and ask the user for a replacement for that role instead.
+
 ## Launching roles
 
 Each of the four roles is a Claude Code subagent defined in `.claude/agents/`:

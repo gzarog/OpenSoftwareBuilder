@@ -14,31 +14,51 @@ osb.yaml                  (with models.codex.* filled in, or left blank to be pr
 ```
 
 Each `.codex/agents/*.toml` file is the smallest possible launcher: it names the agent,
-binds a model slot from `osb.yaml`, and points Codex at the canonical role definition in
-`.agents/skills/osb/references/roles.md`. It does not duplicate the workflow.
+sets its native `sandbox_mode`, and points Codex at the canonical role definition in
+`.agents/skills/osb/references/roles.md` via `developer_instructions`. It does not
+duplicate the workflow, and it never hardcodes a model — see "Model binding" below.
 
 ## Invocation
 
-Codex has no native `/osb`-style slash command for arbitrary skills. Trigger the workflow
-by asking Codex directly, e.g.:
+The canonical skill at `.agents/skills/osb/SKILL.md` carries Agent Skills frontmatter
+(`name: osb`), so Codex can discover and invoke it directly:
 
 ```text
-Run the OSB workflow for: <task>
+$osb <task>
 ```
 
-Codex should then read `.agents/skills/osb/SKILL.md`, resolve models for host `codex`
-from `osb.yaml`, and drive the Architect → Implementer(s) → Reviewer → QA lifecycle using
-the agents in `.codex/agents/`.
+If `$osb` isn't discovered automatically, fall back to explicit skill discovery:
 
-If your Codex setup supports custom prompt shortcuts, you can bind a shortcut (e.g.
-`osb`) that expands to the line above — this is the "smallest possible compatibility
-launcher" the OSB v2 contract calls for; it is not a separate copy of the workflow.
+```text
+/skills
+```
+
+then select `osb` from the list.
+
+Either path has Codex read `.agents/skills/osb/SKILL.md`, resolve models for host `codex`
+from `osb.yaml`, and drive the Architect → Implementer(s) → Reviewer → QA lifecycle using
+the agents in `.codex/agents/` — each running under its own `sandbox_mode`
+(`architect`/`reviewer`/`qa`: `read-only`; `implementer`: `workspace-write`).
+
+Plain-English invocation (e.g. "Run the OSB workflow for: `<task>`") remains available as
+a fallback, but `$osb <task>` is the primary, documented mechanism.
 
 ## Model binding
 
-Each `.codex/agents/*.toml` has an empty `model = ""` placeholder. OSB resolves it from
-`osb.yaml` → `models.codex.<role>` before dispatch; it is never hardcoded in the TOML
-file, so switching models never requires editing the agent definitions.
+`.codex/agents/*.toml` files never set a `model` field. The OSB coordinator resolves each
+role's model from `osb.yaml` independently before dispatch — there is no shared or
+default model across roles:
+
+```text
+Architect   dispatch → model = models.codex.architect
+Implementer dispatch → model = models.codex.implementer
+Reviewer    dispatch → model = models.codex.reviewer
+QA          dispatch → model = models.codex.qa
+```
+
+A role is never dispatched before its own model is resolved. If a required model is
+missing or a configured model is unavailable, Codex stops and asks the user for that role
+only, rather than falling back to a Codex default.
 
 ## RagMonk
 

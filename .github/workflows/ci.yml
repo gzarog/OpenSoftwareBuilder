@@ -7,43 +7,12 @@ on:
     branches: [main]
 
 jobs:
-  structure:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verify required OSB v2 files exist
-        run: |
-          set -euo pipefail
-          required_files=(
-            ".agents/skills/osb/SKILL.md"
-            ".agents/skills/osb/references/workflow.md"
-            ".agents/skills/osb/references/roles.md"
-            ".agents/skills/osb/references/handoff.md"
-            ".agents/skills/osb/references/knowledge.md"
-            ".agents/skills/osb/references/ragmonk.md"
-            ".claude/skills/osb/SKILL.md"
-            ".claude/agents/architect.md"
-            ".claude/agents/implementer.md"
-            ".claude/agents/reviewer.md"
-            ".claude/agents/qa.md"
-            ".codex/agents/architect.toml"
-            ".codex/agents/implementer.toml"
-            ".codex/agents/reviewer.toml"
-            ".codex/agents/qa.toml"
-            ".github/copilot-instructions.md"
-            ".github/agents/architect.agent.md"
-            ".github/agents/implementer.agent.md"
-            ".github/agents/reviewer.agent.md"
-            ".github/agents/qa.agent.md"
-            "templates/osb.yaml"
-            "templates/knowledge/task.md"
-            "templates/knowledge/component.md"
-          )
-          missing=0
-          for f in "${required_files[@]}"; do
-            if [ ! -f "$f" ]; then
-              echo "Missing required file: $f"
-              missing=1
-            fi
-          done
-          exit "$missing"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate OSB v2 structure
+        run: python scripts/validate_osb.py

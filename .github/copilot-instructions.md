@@ -15,10 +15,21 @@ workflow" for a task, do the following:
    of `architect`, `implementer`, `reviewer`, `qa` is missing a model, stop and ask the
    user per `SKILL.md` §"Model resolution" before doing any work.
 3. Launch each role using the corresponding definition in `.github/agents/`
-   (`architect.agent.md`, `implementer.agent.md`, `reviewer.agent.md`, `qa.agent.md`).
-   Each dispatch must be a self-contained brief per
-   `.agents/skills/osb/references/handoff.md` — the role has no memory of this
-   conversation.
+   (`architect.agent.md`, `implementer.agent.md`, `reviewer.agent.md`, `qa.agent.md`),
+   binding each dispatch to its own resolved model — there is no shared or default model
+   across roles:
+
+   ```text
+   invoke Architect   → model = models.copilot.architect
+   invoke Implementer → model = models.copilot.implementer
+   invoke Reviewer    → model = models.copilot.reviewer
+   invoke QA          → model = models.copilot.qa
+   ```
+
+   Never dispatch a role before its own model is resolved; if a configured model is
+   unavailable, stop and ask the user for a replacement for that role only. Each dispatch
+   must be a self-contained brief per `.agents/skills/osb/references/handoff.md` — the
+   role has no memory of this conversation.
 4. Use RagMonk via its MCP tools when configured in this environment; fall back to the
    RagMonk CLI only if MCP is unavailable. Follow
    `.agents/skills/osb/references/ragmonk.md`, including stopping the workflow when

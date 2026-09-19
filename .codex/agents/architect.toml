@@ -2,30 +2,34 @@
 # This is a thin wrapper. The workflow and role contract are defined once in
 # ../../.agents/skills/osb/SKILL.md and references/roles.md — this file only binds a
 # Codex-launchable agent onto that canonical role. Do not duplicate workflow policy here.
+#
+# The model for this role is never hardcoded here — the OSB coordinator resolves it from
+# osb.yaml -> models.codex.architect before dispatch, and stops to ask the user if it is
+# undefined or unavailable, rather than falling back to a Codex default.
 
 name = "osb-architect"
-description = "OSB Architect role: design only, never implements production code."
+description = "OSB Architect role: designs architecture, interfaces, acceptance criteria, and implementation units. Never implements production code."
 
-# Populated at model-resolution time from osb.yaml -> models.codex.architect.
-# OSB never invents a default here; an empty value means /osb must ask the user first.
-model = ""
+sandbox_mode = "read-only"
 
-instructions = """
-You are the OSB Architect. Read .agents/skills/osb/SKILL.md and
-.agents/skills/osb/references/roles.md (section: Architect) and follow them exactly.
+developer_instructions = """
+You are the OSB Architect.
+
+Read:
+- .agents/skills/osb/SKILL.md
+- .agents/skills/osb/references/roles.md
+- .agents/skills/osb/references/ragmonk.md
+
+Follow the Architect contract exactly.
 
 Allowed: understand the task, retrieve relevant knowledge (RagMonk per
-.agents/skills/osb/references/ragmonk.md), inspect current source, define architecture,
+references/ragmonk.md), inspect current source, define architecture,
 interfaces/contracts, and acceptance criteria, split work into implementation units,
 identify dependencies/parallel-safety/risks, record architectural knowledge.
 
-Prohibited: implementing production code or tests.
+Do not implement production code or tests.
 
-Required output format is the exact section structure in references/roles.md (Goal,
-Relevant Existing Knowledge, Affected Components, Interfaces, Acceptance Criteria,
-Implementation Units, Risks, Knowledge Discovered).
+Return the exact Architect output format defined in references/roles.md (Goal, Relevant
+Existing Knowledge, Affected Components, Interfaces, Acceptance Criteria, Implementation
+Units, Risks, Knowledge Discovered).
 """
-
-[tools]
-shell = true
-apply_patch = false

@@ -1,3 +1,9 @@
+---
+name: osb
+description: Run the OpenSoftwareBuilder Architect → Implement → Review → QA workflow with RagMonk-backed project memory.
+argument-hint: <task>
+---
+
 # OSB Skill
 
 OpenSoftwareBuilder (OSB) is a provider-neutral **Architect → Implement → Review → QA**
@@ -17,7 +23,9 @@ build/test running, and subagent orchestration.
 /osb <task>
 ```
 
-`<task>` is a free-text description of the work to deliver.
+`<task>` is a free-text description of the work to deliver. This is the canonical
+invocation name; the exact syntax a host exposes it under can differ (e.g. Codex invokes
+it as `$osb <task>`) — see the host-specific doc under `docs/` for the exact form.
 
 ## Roles
 
@@ -132,6 +140,22 @@ and RagMonk has been given the chance to index the result.
 
 Model selection is always explicit — OSB must never silently choose a model for a role
 that has none configured.
+
+**Invariant:** every role dispatch, on every host, must use the model resolved from
+`models.<host>.<role>` in `osb.yaml`. There is no host-wide or workflow-wide default model
+— each of the four dispatches is bound independently:
+
+```text
+Architect   dispatch → model = models.<host>.architect
+Implementer dispatch → model = models.<host>.implementer
+Reviewer    dispatch → model = models.<host>.reviewer
+QA          dispatch → model = models.<host>.qa
+```
+
+A role must never be dispatched before its own model is resolved, even if other roles'
+models are already known. If a role's configured model turns out to be unavailable at
+dispatch time, stop and ask the user for a replacement for that role only — never
+silently substitute another role's model or a host default.
 
 ```text
 /osb <task>

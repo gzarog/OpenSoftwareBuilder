@@ -14,10 +14,12 @@ Copy into your project:
 osb.yaml                         (with models.copilot.* filled in, or left blank)
 ```
 
-`copilot-instructions.md` is read automatically by Copilot Chat/agent mode in VS Code. It
-tells Copilot to treat `/osb <task>` (or a plain-English request to run the OSB workflow)
-as an instruction to load `.agents/skills/osb/SKILL.md` and follow it, dispatching roles
-via the `.github/agents/*.agent.md` definitions.
+The canonical skill at `.agents/skills/osb/SKILL.md` carries Agent Skills frontmatter
+(`name: osb`), so hosts that support Agent Skills — including VS Code Copilot — can
+discover and invoke it natively as `/osb`. `copilot-instructions.md` is read
+automatically by Copilot Chat/agent mode and carries general OSB integration rules (host
+identity, per-role model binding, RagMonk access, knowledge consolidation) — it is not
+what creates the `/osb` slash command itself.
 
 ## Invocation
 
@@ -25,10 +27,9 @@ via the `.github/agents/*.agent.md` definitions.
 /osb <task>
 ```
 
-VS Code Copilot does not natively support arbitrary custom slash commands the way Claude
-Code does; `copilot-instructions.md` is the compatibility layer that makes the same
-`/osb <task>` phrasing work by instructing Copilot what to do when it sees it, without
-duplicating the workflow itself.
+This is the primary invocation, resolved through Copilot's Agent Skills mechanism against
+the canonical skill. Copilot then dispatches roles via the `.github/agents/*.agent.md`
+definitions, per `copilot-instructions.md`.
 
 ## RagMonk
 
@@ -37,5 +38,15 @@ to the RagMonk CLI. See `docs/RAGMONK.md`.
 
 ## Model binding
 
-`.github/agents/*.agent.md` files do not hardcode a model. Copilot resolves the model for
-each role from `osb.yaml` → `models.copilot.<role>` before dispatching that role.
+`.github/agents/*.agent.md` files do not hardcode a model. Each role dispatch is bound to
+its own resolved model, independently — there is no shared or default model across roles:
+
+```text
+Architect   dispatch → model = models.copilot.architect
+Implementer dispatch → model = models.copilot.implementer
+Reviewer    dispatch → model = models.copilot.reviewer
+QA          dispatch → model = models.copilot.qa
+```
+
+A role is never dispatched before its own model is resolved. If a configured model is
+unavailable, Copilot stops and asks the user for a replacement for that role only.
