@@ -8,6 +8,8 @@ model. Host-specific native-command smoke tests are a separate, explicitly label
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -142,6 +144,58 @@ class ExistingProjectFixtureTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual((self.workspace / "src/app.py").read_text(), "print('existing project file')\n")
         self.assertEqual((self.workspace / "README.md").read_text(), "# Existing project\n")
+
+
+class MultiRepoFixtureTests(unittest.TestCase):
+    """Simulates the 'multi-repo root' fixture (P0-A 0A.3 / P0-A Phase 3): the osb/
+    package installs cleanly at a root whose children are independent Git repositories,
+    and the workspace config validates with the expected dependency order."""
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.workspace = make_fake_workspace(Path(self._tmp.name) / "multi-repo-root")
+
+        for rel in ("shared-contracts", "services/identity-api", "services/payment-api"):
+            path = self.workspace / rel
+            path.mkdir(parents=True)
+            subprocess.run(["git", "init", "-q"], cwd=path, check=True, capture_output=True)
+
+        (self.workspace / "osb.yaml").write_text(
+            "version: 2\n"
+            "workspace:\n"
+            "  mode: multi-repo\n"
+            "  root: .\n"
+            "  repositories:\n"
+            "    - id: contracts\n"
+            "      path: shared-contracts\n"
+            "    - id: identity\n"
+            "      path: services/identity-api\n"
+            "      depends_on: [contracts]\n"
+            "    - id: payments\n"
+            "      path: services/payment-api\n"
+            "      depends_on: [contracts, identity]\n",
+            encoding="utf-8",
+        )
+
+    def test_init_succeeds_at_a_multi_repo_root_without_touching_child_repos(self) -> None:
+        result = run_install(self.workspace, "init", "--host", "claude")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for rel in CLAUDE_FILES:
+            self.assertTrue((self.workspace / rel).is_file())
+        # osb.yaml must be preserved exactly (it already existed with the workspace block).
+        self.assertIn("workspace:", (self.workspace / "osb.yaml").read_text())
+
+    def test_workspace_validator_reports_correct_dispatch_order(self) -> None:
+        script = self.workspace / "osb/scripts/workspace_validate.py"
+        result = subprocess.run(
+            [sys.executable, str(script), "osb.yaml", "--workspace-root", "."],
+            cwd=self.workspace,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("contracts -> identity -> payments", result.stdout)
 
 
 if __name__ == "__main__":

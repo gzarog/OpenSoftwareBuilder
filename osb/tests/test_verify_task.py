@@ -188,5 +188,54 @@ class VerifyTaskTests(unittest.TestCase):
         self.assertEqual(fp, self.fingerprint, "excluded paths must not affect the fingerprint")
 
 
+class MultiRepoVerifyTaskTests(unittest.TestCase):
+    """P0-A 3.3: changing one affected repo invalidates workspace-level final review/QA
+    approvals, even if the other repositories are untouched."""
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.workspace_root = Path(self._tmp.name)
+        self.contracts = self.workspace_root / "contracts"
+        self.payments = self.workspace_root / "services/payment-api"
+        self.contracts_base = _init_repo(self.contracts)
+        self.payments_base = _init_repo(self.payments)
+
+        self.repositories = {
+            "contracts": {"path": "contracts", "base_revision": self.contracts_base},
+            "payments": {"path": "services/payment-api", "base_revision": self.payments_base, "depends_on": ["contracts"]},
+        }
+        for repo_id, info in self.repositories.items():
+            info["patch_fingerprint"] = verify_task.compute_fingerprint(
+                self.workspace_root / info["path"], info["base_revision"]
+            )
+        self.workspace_fp = verify_task.compute_workspace_fingerprint(self.workspace_root, self.repositories)
+
+    def _state(self) -> dict:
+        state = _complete_state("unused-single-repo-base", self.workspace_fp)
+        state["quality"]["task_base_revision"] = self.contracts_base  # unused in multi-repo path, but required by schema
+        state["workspace"] = {"mode": "multi-repo", "repositories": copy.deepcopy(self.repositories)}
+        return state
+
+    def test_valid_multi_repo_task_passes(self) -> None:
+        ok, reasons = verify_task.check_completion(self._state(), self.workspace_root)
+        self.assertTrue(ok, reasons)
+
+    def test_change_in_one_repo_invalidates_workspace_fingerprint(self) -> None:
+        state = self._state()
+        (self.payments / "a.py").write_text("print('a changed')\n", encoding="utf-8")
+        ok, reasons = verify_task.check_completion(state, self.workspace_root)
+        self.assertFalse(ok)
+        self.assertTrue(any("payments" in r and "stale" in r for r in reasons))
+        self.assertTrue(any("current_patch_fingerprint is stale" in r for r in reasons))
+
+    def test_unaffected_repo_unchanged_but_workspace_fp_still_tracks_all_repos(self) -> None:
+        state = self._state()
+        (self.contracts / "a.py").write_text("print('a changed')\n", encoding="utf-8")
+        ok, reasons = verify_task.check_completion(state, self.workspace_root)
+        self.assertFalse(ok)
+        self.assertTrue(any("contracts" in r and "stale" in r for r in reasons))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -92,6 +92,25 @@ def compute_fingerprint(repo_root: Path, base_revision: str) -> str:
     return f"fp-{hasher.hexdigest()[:16]}"
 
 
+def compute_workspace_fingerprint(workspace_root: Path, repositories: dict) -> str:
+    """Ordered digest over each affected repository's identity, path, base revision, and
+    effective patch fingerprint (P0-A 3.2 §Workspace fingerprint). Sorted by repo id so the
+    result is independent of dict/config ordering; changing any one repository changes
+    this fingerprint, which is what invalidates workspace-level review/QA approvals."""
+
+    hasher = hashlib.sha256()
+    for repo_id in sorted(repositories):
+        info = repositories[repo_id]
+        repo_fp = compute_fingerprint(workspace_root / info["path"], info["base_revision"])
+        hasher.update(repo_id.encode("utf-8"))
+        hasher.update(b"\0")
+        hasher.update(str(info["path"]).encode("utf-8"))
+        hasher.update(b"\0")
+        hasher.update(repo_fp.encode("utf-8"))
+        hasher.update(b"\n")
+    return f"wfp-{hasher.hexdigest()[:16]}"
+
+
 def load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -143,7 +162,18 @@ def check_completion(
         reasons.append(f"required AC id(s) missing exact requirement text in 'acceptance': {sorted(missing_text)}")
 
     try:
-        current_fp = compute_fingerprint(repo_root, quality["task_base_revision"])
+        workspace = state.get("workspace")
+        if workspace:
+            for repo_id, info in workspace.get("repositories", {}).items():
+                repo_fp = compute_fingerprint(repo_root / info["path"], info["base_revision"])
+                if info.get("patch_fingerprint") != repo_fp:
+                    reasons.append(
+                        f"repository '{repo_id}' patch_fingerprint is stale: recorded "
+                        f"{info.get('patch_fingerprint')!r}, recomputed {repo_fp!r}"
+                    )
+            current_fp = compute_workspace_fingerprint(repo_root, workspace.get("repositories", {}))
+        else:
+            current_fp = compute_fingerprint(repo_root, quality["task_base_revision"])
     except VerificationError as exc:
         return False, [str(exc)]
 

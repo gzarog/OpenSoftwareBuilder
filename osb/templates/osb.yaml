@@ -20,11 +20,31 @@ models:
     reviewer:
     qa:
 
+# Opt-in multi-repository orchestration (Phase 3). Omit this whole section for the
+# default single-repo project. See osb/docs/MULTI_REPO.md.
+# workspace:
+#   mode: multi-repo        # default remains single-repo when this section is absent
+#   root: .
+#   repositories:
+#     - id: contracts
+#       path: shared-contracts
+#     - id: identity
+#       path: services/identity-api
+#       depends_on: [contracts]
+#     - id: payments
+#       path: services/payment-api
+#       depends_on: [contracts, identity]
+#   integration_checks:
+#     - name: api-contracts
+#       command: ./scripts/check-contracts.sh
+#       cwd: .
+
 execution:
   max_parallel_implementers: 2
   compact_handoffs: true
   checkpoint_state: true
   delta_repairs: true
+  # isolation: shared        # or: worktree (Phase 4) — default remains shared
 
 knowledge:
   enabled: true

@@ -131,6 +131,13 @@ Avoid opening many full files first, and avoid a broad explore for every questio
 narrow and widen only when the narrow query comes back empty or insufficient, or a
 `quality.md` §Context expansion trigger applies.
 
+## Multi-repository queries
+
+When `osb.yaml` → `workspace.mode: multi-repo` is set (`osb/docs/MULTI_REPO.md`), every
+RagMonk query names the repository id it targets, and results are not merged across
+repositories without that identifier — see `knowledge.md` §Provenance and freshness for
+how retrieved excerpts carry `repository_id`.
+
 ## During the task
 
 Any role may issue targeted RagMonk queries beyond the initial pre-architecture retrieval

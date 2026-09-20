@@ -108,6 +108,8 @@ EXPECTED_PACKAGE_FILES = (
     "scripts/schema_validate.py",
     "scripts/verify_task.py",
     "scripts/classify_task.py",
+    "scripts/yaml_lite.py",
+    "scripts/workspace_validate.py",
     "schemas/task-state.schema.json",
     "schemas/role-result.schema.json",
     "templates/osb.yaml",
@@ -120,6 +122,7 @@ EXPECTED_PACKAGE_FILES = (
     "docs/CODEX.md",
     "docs/COPILOT.md",
     "docs/RAGMONK.md",
+    "docs/MULTI_REPO.md",
 )
 
 # Soft size guardrails (bytes). Guidance, not hard architecture requirements.

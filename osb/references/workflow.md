@@ -197,6 +197,15 @@ only the requested evidence and let it continue (`quality.md` §Context expansio
 triggers) — do not treat that as a failure. On each unit's completion, save CP2 (or CP3 if
 blocked) and advance the knowledge watermark if new knowledge was reported.
 
+### Multi-repository tasks
+
+When `osb.yaml` → `workspace.mode: multi-repo` is set, steps 7–14 run across every
+affected repository rather than one: the Architect maps affected repositories and their
+dependency order, each Implementer capsule is scoped to one repository id, and the final
+review/QA fingerprints in step 11/12 are a workspace fingerprint spanning every affected
+repository (`osb/docs/MULTI_REPO.md`). A single-repo project with no `workspace` block is
+unaffected — this is strictly additive.
+
 ## Step 9 — Review, intermediate/delta scope (CP4)
 
 ```text
