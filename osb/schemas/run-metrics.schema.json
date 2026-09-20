@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "osb://schemas/run-metrics.schema.json",
+  "title": "OSB run metrics record",
+  "description": "Optional, advisory per-run measurement record for Phase 6 benchmarking (osb/docs/BENCHMARKING.md, osb/docs/METRICS.md). Never RagMonk-indexed knowledge, never a completion gate — see osb/references/quality.md.",
+  "type": "object",
+  "required": ["fixture_id", "run_label", "task_revision", "metrics", "quality"],
+  "properties": {
+    "fixture_id": {"type": "string", "minLength": 1},
+    "run_label": {"type": "string", "minLength": 1, "description": "e.g. 'baseline' or 'changed' — an arbitrary label identifying which workflow variant produced this run."},
+    "task_revision": {"type": "string", "minLength": 1, "description": "The patch/workspace fingerprint this run's fixture was executed against, so a comparison is only made across identical revisions."},
+    "measured_at": {"type": ["string", "null"]},
+    "host": {"type": ["string", "null"], "description": "e.g. 'claude-code' — which host actually ran this, if it was a live run."},
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "elapsed_seconds": {"$ref": "#/$defs/numberOrUnavailable"},
+        "model_dispatches": {"$ref": "#/$defs/numberOrUnavailable"},
+        "tool_calls": {"$ref": "#/$defs/numberOrUnavailable"},
+        "input_tokens": {"$ref": "#/$defs/numberOrUnavailable"},
+        "output_tokens": {"$ref": "#/$defs/numberOrUnavailable"},
+        "ragmonk_chars_retrieved": {"$ref": "#/$defs/numberOrUnavailable"},
+        "repair_cycles": {"$ref": "#/$defs/numberOrUnavailable"},
+        "implementers_spawned": {"$ref": "#/$defs/numberOrUnavailable"}
+      }
+    },
+    "quality": {
+      "type": "object",
+      "required": ["ac_coverage"],
+      "properties": {
+        "ac_coverage": {"$ref": "#/$defs/numberOrUnavailable"},
+        "regressions_found": {"$ref": "#/$defs/numberOrUnavailable"},
+        "unresolved_blockers": {"$ref": "#/$defs/numberOrUnavailable"},
+        "repeatable": {"type": ["boolean", "string"]}
+      }
+    }
+  },
+  "$defs": {
+    "numberOrUnavailable": {
+      "oneOf": [
+        {"type": "number"},
+        {"type": "string", "const": "unavailable"}
+      ]
+    }
+  }
+}
