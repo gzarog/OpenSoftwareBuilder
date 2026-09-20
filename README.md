@@ -99,9 +99,12 @@ mechanics differ:
 
 | Host | Invocation | Setup |
 | --- | --- | --- |
-| Claude Code | `/osb <task>` | `docs/CLAUDE.md` |
-| GitHub Copilot / VS Code | `/osb <task>` | `docs/COPILOT.md` |
-| OpenAI Codex | `$osb <task>` | `docs/CODEX.md` |
+| Claude Code | `/osb <task>` | `osb/docs/CLAUDE.md` |
+| GitHub Copilot / VS Code | `/osb <task>` | `osb/docs/COPILOT.md` |
+| OpenAI Codex | `$osb <task>` | `osb/docs/CODEX.md` |
+
+Do not assume a spelling works on a host/version that hasn't actually been smoke-tested —
+see `osb/docs/HOST_COMPATIBILITY.md`.
 
 Provider-specific files under `.claude/`, `.codex/`, and `.github/` are **generated**, thin
 wrappers — they bind models and launch mechanics, they never redefine the workflow, and
@@ -186,6 +189,27 @@ combined-change review and independent, per-AC QA on the final revision are requ
 before completion, and any later repair — including one discovered on resume — invalidates
 prior verdicts until both are re-run. See
 `osb/references/quality.md`.
+
+## Multi-repository projects, isolation, and benchmarking
+
+An opt-in `workspace` block in `osb.yaml` coordinates two or more independent Git
+repositories from one root task — see `osb/docs/MULTI_REPO.md`. Concurrent Implementers
+can optionally run in isolated Git worktrees (`execution.isolation: worktree`) instead of
+a shared checkout. Efficiency claims are measured, not asserted — see
+`osb/docs/BENCHMARKING.md` and `osb/docs/METRICS.md`.
+
+## Further reading
+
+| Doc | Covers |
+| --- | --- |
+| `osb/docs/OSB_V2_CONTRACT.md` | The full provider-neutral specification |
+| `osb/docs/INSTALL.md` | Setup, `init`/`doctor`/`upgrade` |
+| `osb/docs/UPGRADE.md` | Replacing `osb/` with a newer version safely |
+| `osb/docs/MULTI_REPO.md` | Opt-in multi-repository orchestration |
+| `osb/docs/RAGMONK.md` | RagMonk setup, retrieval budgets, provenance |
+| `osb/docs/HOST_COMPATIBILITY.md` | Per-host capability matrix and preflight |
+| `osb/docs/BENCHMARKING.md`, `osb/docs/METRICS.md` | Measurement method and before/after reports |
+| `osb/docs/BASELINE.md` | The pre-migration baseline this plan was implemented against |
 
 ## License
 
