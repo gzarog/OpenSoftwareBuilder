@@ -107,6 +107,7 @@ EXPECTED_PACKAGE_FILES = (
     "scripts/validate_osb.py",
     "scripts/schema_validate.py",
     "scripts/verify_task.py",
+    "scripts/classify_task.py",
     "schemas/task-state.schema.json",
     "schemas/role-result.schema.json",
     "templates/osb.yaml",
@@ -122,7 +123,7 @@ EXPECTED_PACKAGE_FILES = (
 )
 
 # Soft size guardrails (bytes). Guidance, not hard architecture requirements.
-SKILL_MD_SIZE_GUARD = 4800
+SKILL_MD_SIZE_GUARD = 5500
 COPILOT_INSTRUCTIONS_SIZE_GUARD = 2000
 
 errors: list[str] = []

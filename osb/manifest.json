@@ -2,7 +2,7 @@
   "generated_files": {
     ".agents/skills/osb/SKILL.md": {
       "package_version": "2.1.0",
-      "sha256": "2712c790b18d18773cf21ecfc25a9120c497639cd972f1f2c4372c5bca5e3cbf"
+      "sha256": "da4a81061feff145b3c4115e39adf565d0f6aa98bf6179084194938f0efc1313"
     },
     ".claude/agents/architect.md": {
       "package_version": "2.1.0",
@@ -67,7 +67,7 @@
     "copilot"
   ],
   "package_files": {
-    "osb/SKILL.md": "2712c790b18d18773cf21ecfc25a9120c497639cd972f1f2c4372c5bca5e3cbf",
+    "osb/SKILL.md": "da4a81061feff145b3c4115e39adf565d0f6aa98bf6179084194938f0efc1313",
     "osb/agents/architect.md": "f14c0bdec2b07833c378b6264e009804b6d68ec20cae4e90d1e65a7958c149ba",
     "osb/agents/implementer.md": "b810256010d5ed26256792153a41888706381069f4011e8e5ff8e3b27640ef32",
     "osb/agents/qa.md": "743b0acf062041513a728ea4d5b10cefb808931224b5218ee5e06474d8b4355c",
@@ -78,7 +78,7 @@
     "osb/docs/COPILOT.md": "b3a40ea53f9b86702c7f7ea089ce2964720b758733a5c31a0db9ca39cd4beb98",
     "osb/docs/INSTALL.md": "3a2debd3f32e726d696dcaa35d1aad121be8cc6bcc56730146019c31c8fc72a4",
     "osb/docs/METRICS.md": "6d69617c488c0943baac82c9e99a7796375e2b6c6da7f7a284f21db40e622904",
-    "osb/docs/OSB_V2_CONTRACT.md": "15a54def9d84ab986ce32fb9caadfb6088cfe1ccfa4f0ef36a3a3b5dbb9f9971",
+    "osb/docs/OSB_V2_CONTRACT.md": "da99562be3ace60e18bc4feac2fd8a24e781dc15d16b5e6895a7698ec652e3a6",
     "osb/docs/RAGMONK.md": "bdabdf16ae4f84ebf6abf4b63ae933470cffc9bb393d577132f3e6b0434a789e",
     "osb/hosts/claude/agent.md.tmpl": "54fb21d66f1557228ef4cd8070feacddd6e0a996a1f630268c49cfd28e950599",
     "osb/hosts/claude/skill.md.tmpl": "86c6bd0829968a5f83ba28a8c153f2da782abc41cd8ca3d1d4d3b2d0ae697d4c",
@@ -93,13 +93,14 @@
     "osb/references/ragmonk.md": "8aa2ddf234f976e78146448e88f507744d47f10ec1fb9d972623aa213be24c0a",
     "osb/references/roles.md": "8d543d72691f3e153df1819940dd4fe9090b5aff6e09da03c7707a3e633e43e0",
     "osb/references/state.md": "69c0440a335c9be958f273408a4e7cf01c1f2c07b660612bae7a3aad66a5ba2e",
-    "osb/references/workflow.md": "dd70ebaeac074c565ae9a3532c51b09d5e506e31328400ec9aa806e8a6284abf",
+    "osb/references/workflow.md": "b615dca477084b2ff4b459c54cef22d9911141e95d2b67bc986ab31bb3555e31",
     "osb/schemas/role-result.schema.json": "7df3457e619b728f446ca3a2078546e0929a4ee2c93cb98c489077bc6c83c9e4",
     "osb/schemas/task-state.schema.json": "4891a844a454f567d508a8f8e1310d3852e134d77a0ae3aabbf3d75e59720e41",
+    "osb/scripts/classify_task.py": "29e1ab7d9577b751cbafc9c872ccbbd2b5ead1686d870145843931bc8cdf3823",
     "osb/scripts/generate_hosts.py": "c07a37c8dac5e840bdf31e790eb68d3c5be8f5256bf71f8a0e7cd9fb6c109449",
     "osb/scripts/install.py": "501864ebca419db97d0d20b36b2ed3a88674f735cb67bf455ad315e2c9643e32",
     "osb/scripts/schema_validate.py": "e0203c049b3383aa9c4f8659664a14bfbab584bd7f653d080290995507546230",
-    "osb/scripts/validate_osb.py": "606017f7bbaf35e60c03f07eb4b8ed1b9b88d473dc6090375876d8390764f1ed",
+    "osb/scripts/validate_osb.py": "d06c48c548d69a1d266975c13c7e7f810fc2255170d1ba0be4683bf646aa568c",
     "osb/scripts/verify_task.py": "883d01afb301ab5fa0f27f15f526f64e1736cf7f0e96c782332e679b25a623cb",
     "osb/templates/knowledge/component.md": "da7646afd8f7e3c54da3d4ef0a55a3403138d12b39ceca7531a73be07978846e",
     "osb/templates/knowledge/task.md": "94dccecb81b1a2aa0b510edab7b6b430e45b4c810203e830135327c6f0cf6c8c",
@@ -113,6 +114,7 @@
     "osb/tests/fixtures/tasks/security-sensitive.json": "0ec758427259be61b86e98d7c313e93d0cf13abe25cbc4526673514f2f4635ae",
     "osb/tests/fixtures/tasks/single-file-bug.json": "9eba87224dd174d24b26ef11ef9179c12ec07b9e28463e07154b2f548b22e8c2",
     "osb/tests/fixtures/tasks/two-repo-shared-contract.json": "512ee3ebf6ef9d487ed5a5262965bf2f88a1bf0d5071028d48ed115187604f68",
+    "osb/tests/test_classify_task.py": "5fe23289f51a2da525e4858e2bd4eb4475b861e326317f4c519fc74d2b428bfb",
     "osb/tests/test_fixtures.py": "7bd0a45420e9d5a687eae8cb7760d130e4ad057343933a6644fa441fd4993fb2",
     "osb/tests/test_generate_hosts.py": "fcdd50ed6f8d51d9be2f7f5c6e7ec2457f704e5b5d5e7bc834709bc8931c6251",
     "osb/tests/test_install.py": "161a5af116e0da963af4901e2cf7a505c6a96c985e93431cf11c457999cce281",

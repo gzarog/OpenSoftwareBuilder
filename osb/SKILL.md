@@ -24,16 +24,17 @@ host discovery.
 2.  Resolve required role models from osb.yaml; never invent a missing model.
 3.  Verify required RagMonk access.
 4.  Load or create compact task state.
-5.  Retrieve bounded, relevant knowledge before architecture.
-6.  Dispatch Architect. CP1.
-7.  Dispatch minimum necessary Implementer(s), each with a unit capsule. CP2/CP3.
-8.  Independent Reviewer over the combined diff (intermediate pass). CP4.
-9.  Repair blocking findings via delta handoffs, then re-review (still intermediate). CP5.
-10. No open blocking findings → mandatory final combined-change review. CP4 (final scope).
-11. Independent QA once final review is clean; verify every AC on the final revision. CP6.
-12. Repair failed ACs via delta handoffs; any repair restarts step 10 and 11.
-13. Consolidate durable knowledge; refresh RagMonk only if knowledge changed. CP7.
-14. Report completion — only once the completion gate holds (`osb/references/quality.md`).
+5.  Classify the task (deterministic-first); persist task_profile/rationale/risk_flags.
+6.  Retrieve bounded, relevant knowledge before architecture, scoped by task_profile.
+7.  Dispatch Architect. CP1.
+8.  Dispatch minimum necessary Implementer(s), each with a unit capsule. CP2/CP3.
+9.  Independent Reviewer over the combined diff (intermediate pass). CP4.
+10. Repair blocking findings via delta handoffs, then re-review (still intermediate). CP5.
+11. No open blocking findings → mandatory final combined-change review. CP4 (final scope).
+12. Independent QA once final review is clean; verify every AC on the final revision. CP6.
+13. Repair failed ACs via delta handoffs; any repair restarts step 11 and 12.
+14. Consolidate durable knowledge; refresh RagMonk only if knowledge changed. CP7.
+15. Report completion — only once the completion gate holds (`osb/references/quality.md`).
 ```
 
 ## Rules
@@ -54,6 +55,9 @@ host discovery.
   prior final-review and QA approvals are stale — require a fresh final combined-change
   review and independent QA against the final revision before completion
   (`osb/references/quality.md`).
+- Classification (`osb/references/workflow.md` §Task classification) selects initial
+  context/execution strategy only — it never drops a required acceptance criterion, skips
+  the independent Reviewer, or weakens the mandatory final review/QA gates.
 
 ## Model resolution
 
