@@ -3,3 +3,14 @@
 *.swp
 *.swo
 *~
+
+# Python
+__pycache__/
+*.pyc
+
+# OSB installer backups (created by `osb/install.sh upgrade`)
+osb/.backup/
+
+# OSB ephemeral per-task execution state (durable knowledge under .osb/knowledge/ is
+# committed; state is safe to leave untracked)
+.osb/state/*.json

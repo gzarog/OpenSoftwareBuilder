@@ -1,7 +1,9 @@
 # OpenSoftwareBuilder
 
 OpenSoftwareBuilder is a reusable Architect → Implement → Review → QA agent workflow with
-RagMonk-backed project memory.
+RagMonk-backed project memory, distributed as a single portable `osb/` package: copy
+`osb/` into a workspace, run its one-time installer, and register the coding host(s) you
+use.
 
 ```text
 /osb <task>
@@ -85,10 +87,10 @@ policy, role contracts, model configuration, and knowledge conventions on top of
 
 Any role may pause with a `needs-evidence` request instead of guessing over a truncated
 retrieval, a missing constraint, or an unclear dependency — see
-`.agents/skills/osb/references/quality.md`.
+`osb/references/quality.md`.
 
-See `docs/OSB_V2_CONTRACT.md` for the full provider-neutral specification, and
-`.agents/skills/osb/SKILL.md` for the workflow itself.
+See `osb/docs/OSB_V2_CONTRACT.md` for the full provider-neutral specification, and
+`osb/SKILL.md` for the workflow itself.
 
 ## Supported hosts
 
@@ -101,18 +103,26 @@ mechanics differ:
 | GitHub Copilot / VS Code | `/osb <task>` | `docs/COPILOT.md` |
 | OpenAI Codex | `$osb <task>` | `docs/CODEX.md` |
 
-Provider-specific files under `.claude/`, `.codex/`, and `.github/` are thin wrappers —
-they bind models and launch mechanics, they never redefine the workflow.
+Provider-specific files under `.claude/`, `.codex/`, and `.github/` are **generated**, thin
+wrappers — they bind models and launch mechanics, they never redefine the workflow, and
+they are regenerated from `osb/hosts/` templates by `osb/install.sh` / `osb/install.ps1`.
 
 ## Getting started
 
-See `docs/INSTALL.md` for the full setup steps. In short: copy `.agents/skills/osb/`,
-the provider files for your host(s), and `templates/osb.yaml` (as `osb.yaml`) into your
-project, fill in a model per role per host, and run `/osb <task>`.
+See `osb/docs/INSTALL.md` for the full setup steps. In short:
+
+```sh
+# copy the osb/ directory into your workspace, then:
+bash ./osb/install.sh init --host claude   # or codex, copilot, or 'all'
+```
+
+fill in a model per role per host in the generated root `osb.yaml`, and run `/osb <task>`
+(or the host's documented equivalent — see `osb/docs/HOST_COMPATIBILITY.md`).
 
 ## Configuration
 
-A project needs only one small `osb.yaml` (see `templates/osb.yaml`):
+A project needs only one small `osb.yaml` at the workspace root, created from
+`osb/templates/osb.yaml` on first `init`:
 
 ```yaml
 version: 2
@@ -158,7 +168,7 @@ index/retrieval layer over them:
 └── components/    current-state record per touched component, edited in place
 ```
 
-See `docs/RAGMONK.md` and `.agents/skills/osb/references/knowledge.md`.
+See `osb/docs/RAGMONK.md` and `osb/references/knowledge.md`.
 
 ## Execution state
 
@@ -166,7 +176,7 @@ Task progress — current phase, unit status, open findings, failed acceptance c
 is persisted separately as compact JSON at `.osb/state/<task-id>.json`. It is never
 treated as knowledge or indexed by RagMonk, and it's what lets an interrupted `/osb` run
 resume from its current phase instead of restarting. See
-`.agents/skills/osb/references/state.md`.
+`osb/references/state.md`.
 
 ## Quality gate
 
@@ -175,7 +185,7 @@ case, not evidence caps. A delta review pass is always intermediate; a mandatory
 combined-change review and independent, per-AC QA on the final revision are required
 before completion, and any later repair — including one discovered on resume — invalidates
 prior verdicts until both are re-run. See
-`.agents/skills/osb/references/quality.md`.
+`osb/references/quality.md`.
 
 ## License
 

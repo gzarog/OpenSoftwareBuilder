@@ -1,0 +1,104 @@
+{
+  "generated_files": {
+    ".agents/skills/osb/SKILL.md": {
+      "package_version": "2.1.0",
+      "sha256": "2712c790b18d18773cf21ecfc25a9120c497639cd972f1f2c4372c5bca5e3cbf"
+    },
+    ".claude/agents/architect.md": {
+      "package_version": "2.1.0",
+      "sha256": "f14c0bdec2b07833c378b6264e009804b6d68ec20cae4e90d1e65a7958c149ba"
+    },
+    ".claude/agents/implementer.md": {
+      "package_version": "2.1.0",
+      "sha256": "b810256010d5ed26256792153a41888706381069f4011e8e5ff8e3b27640ef32"
+    },
+    ".claude/agents/qa.md": {
+      "package_version": "2.1.0",
+      "sha256": "743b0acf062041513a728ea4d5b10cefb808931224b5218ee5e06474d8b4355c"
+    },
+    ".claude/agents/reviewer.md": {
+      "package_version": "2.1.0",
+      "sha256": "5ac4be8d824342ec342516999b8c3395c60ff6744428dcd9d2ebce49d747a691"
+    },
+    ".claude/skills/osb/SKILL.md": {
+      "package_version": "2.1.0",
+      "sha256": "f8403bea40337686cb3d1e9def0289dd0c027f71659ed76afb11c061c88fec04"
+    },
+    ".codex/agents/architect.toml": {
+      "package_version": "2.1.0",
+      "sha256": "971147c89cc3e948224257f9bb162b8d0d70e93f3c57f7d6200dfdafcc123758"
+    },
+    ".codex/agents/implementer.toml": {
+      "package_version": "2.1.0",
+      "sha256": "ad46c2186f5455ccc412cbd814ed018f0130d4d6bfd4d894e686a5455d61f586"
+    },
+    ".codex/agents/qa.toml": {
+      "package_version": "2.1.0",
+      "sha256": "27f63260a52cc5f0a53e6aa8f73894da5c9b214f58456d57594498184903c86f"
+    },
+    ".codex/agents/reviewer.toml": {
+      "package_version": "2.1.0",
+      "sha256": "dfb0f91037963a80d68d548fabe2161cc857078fed2e1e5e99c87e15f3dc1326"
+    },
+    ".github/agents/architect.agent.md": {
+      "package_version": "2.1.0",
+      "sha256": "121851d05575ddfc04bbb4b17018ad0fc5e76cd82508c837c4f4c7655d41e1e0"
+    },
+    ".github/agents/implementer.agent.md": {
+      "package_version": "2.1.0",
+      "sha256": "593d5ee0bec4f7e24493ca38bdc96cb3466de26c56d526896f9b28fd508b6b6c"
+    },
+    ".github/agents/qa.agent.md": {
+      "package_version": "2.1.0",
+      "sha256": "3c8bc2f7b8a36f571822ffff6442919b3284023b830fb08b0243f723357c3931"
+    },
+    ".github/agents/reviewer.agent.md": {
+      "package_version": "2.1.0",
+      "sha256": "07feddf676597b2a010095e884e028fd67e53519dfb40ec9dc212a80139dd3f1"
+    },
+    ".github/copilot-instructions.md": {
+      "package_version": "2.1.0",
+      "sha256": "e27da82c5a4aa9d11a6c051bae25bcfb12abad3c52de655129e7a2da64d04734"
+    }
+  },
+  "hosts_registered": [
+    "claude",
+    "codex",
+    "copilot"
+  ],
+  "package_files": {
+    "osb/SKILL.md": "2712c790b18d18773cf21ecfc25a9120c497639cd972f1f2c4372c5bca5e3cbf",
+    "osb/agents/architect.md": "f14c0bdec2b07833c378b6264e009804b6d68ec20cae4e90d1e65a7958c149ba",
+    "osb/agents/implementer.md": "b810256010d5ed26256792153a41888706381069f4011e8e5ff8e3b27640ef32",
+    "osb/agents/qa.md": "743b0acf062041513a728ea4d5b10cefb808931224b5218ee5e06474d8b4355c",
+    "osb/agents/reviewer.md": "5ac4be8d824342ec342516999b8c3395c60ff6744428dcd9d2ebce49d747a691",
+    "osb/docs/CLAUDE.md": "389eaeeb2e1e6cb23cb4a89f7d335806d1378e455f08cdf10523554002a2e548",
+    "osb/docs/CODEX.md": "915ece3110ab34d4f841c296f8863296297f7f66274ba80b2f2af91b51f31d18",
+    "osb/docs/COPILOT.md": "b3a40ea53f9b86702c7f7ea089ce2964720b758733a5c31a0db9ca39cd4beb98",
+    "osb/docs/INSTALL.md": "3a2debd3f32e726d696dcaa35d1aad121be8cc6bcc56730146019c31c8fc72a4",
+    "osb/docs/OSB_V2_CONTRACT.md": "15a54def9d84ab986ce32fb9caadfb6088cfe1ccfa4f0ef36a3a3b5dbb9f9971",
+    "osb/docs/RAGMONK.md": "bdabdf16ae4f84ebf6abf4b63ae933470cffc9bb393d577132f3e6b0434a789e",
+    "osb/hosts/claude/agent.md.tmpl": "54fb21d66f1557228ef4cd8070feacddd6e0a996a1f630268c49cfd28e950599",
+    "osb/hosts/claude/skill.md.tmpl": "86c6bd0829968a5f83ba28a8c153f2da782abc41cd8ca3d1d4d3b2d0ae697d4c",
+    "osb/hosts/codex/agent.toml.tmpl": "a9d6b7522ad1315884fe9aff34e28f4ed058f1ba284906461e4ab47e934949f6",
+    "osb/hosts/copilot/agent.md.tmpl": "68817c5f5f6ee9c6dee2d6f0710c953b19a23414acf541acf1ee08ba1ec9c5eb",
+    "osb/hosts/copilot/copilot-instructions.md.tmpl": "1737aee803be3028ea7dd9abe7a04e61ed297ec64d6feee86410c3069699ea67",
+    "osb/install.ps1": "c922e54cf5dfb089eb95613962f9e40aa42744e4018a4db157d89b11bd164e2e",
+    "osb/install.sh": "45c7cd1b03dd3130c76efc333b3533bda24a1e0da993e3afac72beaba4e77e94",
+    "osb/references/handoff.md": "d967bba55cc8c404e33fbe0efb2e5d4266a36316d1d81e45064f26c76f85ee82",
+    "osb/references/knowledge.md": "a30a29e1d8722ae1fa3d9945872874e7b635503b1fc8d49d5b4bc770694ba14b",
+    "osb/references/quality.md": "c378d4274f7615bec26e27262bd893817a9037ca9e3914fcb15b363699df888f",
+    "osb/references/ragmonk.md": "8aa2ddf234f976e78146448e88f507744d47f10ec1fb9d972623aa213be24c0a",
+    "osb/references/roles.md": "8d543d72691f3e153df1819940dd4fe9090b5aff6e09da03c7707a3e633e43e0",
+    "osb/references/state.md": "9853c27637f15ef3e570c6a1d3786d1792eb081b556dd22868d839b4c4ace1a6",
+    "osb/references/workflow.md": "9beb7ccedc1b5507c67515d95730f5a748c9ecc6793f0950a64ac44a637d8738",
+    "osb/scripts/generate_hosts.py": "c07a37c8dac5e840bdf31e790eb68d3c5be8f5256bf71f8a0e7cd9fb6c109449",
+    "osb/scripts/install.py": "501864ebca419db97d0d20b36b2ed3a88674f735cb67bf455ad315e2c9643e32",
+    "osb/scripts/validate_osb.py": "fd9af76c41bd305fd0b92738d66c6b75e2d6da255de4d80ae63f6759e2ce7842",
+    "osb/templates/knowledge/component.md": "da7646afd8f7e3c54da3d4ef0a55a3403138d12b39ceca7531a73be07978846e",
+    "osb/templates/knowledge/task.md": "94dccecb81b1a2aa0b510edab7b6b430e45b4c810203e830135327c6f0cf6c8c",
+    "osb/templates/osb.yaml": "217ffc094d3d9a1660b722349c53ba1d7d11688457e3760113a4e54dfebf6983",
+    "osb/templates/state/task.json": "d9b6745f12ff800fd51a3feb9ee54d74e6a4f28c908a6de5f022d549fd9aca7d"
+  },
+  "package_version": "2.1.0"
+}

@@ -52,8 +52,8 @@ default) and follows a progressive narrow-to-wide order. These are **initial def
 the cheap, common case, not evidence caps** — a role facing truncated evidence, a hidden
 required interface, or another named gap escalates within its role, rather than accepting
 incomplete evidence as an answer. See
-`.agents/skills/osb/references/ragmonk.md` §Retrieval budgets and
-`.agents/skills/osb/references/quality.md` §Context expansion triggers.
+`osb/references/ragmonk.md` §Retrieval budgets and
+`osb/references/quality.md` §Context expansion triggers.
 
 The shortest valid config (all other fields use their defaults):
 
@@ -95,12 +95,12 @@ With watch mode running, knowledge events OSB appends to
 `.osb/knowledge/events/<task-id>.jsonl` are picked up automatically. Without it, set
 `ragmonk.refresh_after_knowledge_change: true` so OSB requests an explicit refresh
 whenever a checkpoint actually adds new knowledge (never on a checkpoint that adds none —
-see `.agents/skills/osb/references/knowledge.md` §Watermark).
+see `osb/references/knowledge.md` §Watermark).
 
 ## Failure behavior
 
 If `ragmonk.required: true` and RagMonk is unreachable or this repository is not indexed,
 `/osb` stops before any role runs and reports what to fix (install RagMonk, `ragmonk
 init`, `ragmonk source add .`, `ragmonk index`). It does not silently fall back to ad hoc
-repository search — see `.agents/skills/osb/references/ragmonk.md` for the exact
+repository search — see `osb/references/ragmonk.md` for the exact
 verification procedure OSB follows.

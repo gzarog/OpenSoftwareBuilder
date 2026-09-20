@@ -1,0 +1,29 @@
+{
+  "fixture_id": "two-repo-shared-contract",
+  "description": "A shared API contract changes in an upstream repo and a dependent service repo must adapt.",
+  "goal": "Add a required 'currency' field to the shared Order contract and update the payment service to populate it",
+  "scenario": {
+    "files_estimate": 5,
+    "repositories": 2,
+    "cross_service_contracts": true,
+    "migrations": false,
+    "security_sensitive": false,
+    "acceptance_criteria_count": 3
+  },
+  "workspace": {
+    "mode": "multi-repo",
+    "repositories": [
+      {"id": "contracts", "path": "shared-contracts"},
+      {"id": "payments", "path": "services/payment-api", "depends_on": ["contracts"]}
+    ]
+  },
+  "expected_task_profile": "cross-service",
+  "expected_risk_flags": [],
+  "expected_behavior": [
+    "dependency and interface mapping before dispatch",
+    "coordinated units in dependency order (contracts before payments)",
+    "contract/integration verification",
+    "one workspace fingerprint spanning both repositories",
+    "broken shared contract fails cross-repo QA even if per-repo unit tests pass"
+  ]
+}

@@ -3,13 +3,13 @@
 This is the provider-neutral specification for OpenSoftwareBuilder v2. It can be fully
 understood without referring to Go code, PowerShell commands, provider abstractions,
 toolchains, profiles, or executors — none of those exist in v2. The full detail lives in
-`.agents/skills/osb/`; this document is the frozen summary of what that skill guarantees.
+`osb/`; this document is the frozen summary of what that skill guarantees.
 
 ## Roles
 
 Exactly four: **Architect**, **Implementer** (one or more), **Reviewer**, **QA**. Full
 responsibilities, prohibitions, and output formats:
-`.agents/skills/osb/references/roles.md`.
+`osb/references/roles.md`.
 
 ## Lifecycle
 
@@ -37,15 +37,15 @@ Execution state is persisted after every checkpoint so an interrupted task can r
 from its current phase instead of restarting. Information moves forward between roles as
 references + compact state + deltas, never as full transcripts — bounded by the quality
 gate below, which is deliberately the one place completion cannot be inferred from a
-narrow, cheap check. Full detail: `.agents/skills/osb/references/workflow.md` and
-`.agents/skills/osb/references/state.md`.
+narrow, cheap check. Full detail: `osb/references/workflow.md` and
+`osb/references/state.md`.
 
 ## Model resolution
 
 Model selection is always explicit, per role, per host. OSB never invents a default
 model for a role that has none configured — it stops and asks the user. Configuration
 lives in `osb.yaml` → `models.<host>.{architect,implementer,reviewer,qa}`. Full detail:
-`.agents/skills/osb/SKILL.md` §"Model resolution".
+`osb/SKILL.md` §"Model resolution".
 
 ## RagMonk responsibilities
 
@@ -54,7 +54,7 @@ RagMonk (MCP preferred, CLI fallback). OSB does not implement its own code-analy
 repository-search engine. When `osb.yaml` sets `ragmonk.required: true` and RagMonk is
 unreachable or the repository isn't indexed, OSB stops before the Architect is dispatched
 rather than silently falling back to ad hoc search. Full detail:
-`.agents/skills/osb/references/ragmonk.md`.
+`osb/references/ragmonk.md`.
 
 ## Handoff format
 
@@ -68,7 +68,7 @@ affected finding/AC as a delta back to an Implementer or Architect — never a r
 whole task, though the loop only closes on the full final review and QA passes, not the
 delta recheck alone. Any role may report `needs-evidence` with a named question instead of
 guessing over a gap. Full detail, including the per-role schemas:
-`.agents/skills/osb/references/handoff.md` and `.agents/skills/osb/references/roles.md`.
+`osb/references/handoff.md` and `osb/references/roles.md`.
 
 ## Quality gate
 
@@ -81,7 +81,7 @@ previously passed — on that same revision; `not-run`/`blocked`/`inconclusive` 
 reported as `pass`. Both verdicts are tied to a patch fingerprint that covers uncommitted
 implementation content, not just a commit SHA; any later code/test/config change, whether
 from an explicit repair or discovered on resume, invalidates them and requires re-running
-the final review and QA. Full detail: `.agents/skills/osb/references/quality.md`.
+the final review and QA. Full detail: `osb/references/quality.md`.
 
 ## Incremental knowledge format
 
@@ -91,7 +91,7 @@ any checkpoint. Entries are appended as JSONL to `.osb/knowledge/events/<task-id
 during the task, then consolidated after clean QA into an immutable task record
 (`.osb/knowledge/tasks/`) and updated component records (`.osb/knowledge/components/`).
 Knowledge files are authoritative; RagMonk indexes them. Full detail:
-`.agents/skills/osb/references/knowledge.md`.
+`osb/references/knowledge.md`.
 
 ## Execution state
 
@@ -99,7 +99,7 @@ Task progress is persisted as compact, mutable JSON at `.osb/state/<task-id>.jso
 current phase, unit status, open findings, failed acceptance criteria, and a knowledge
 watermark. It is separate from durable knowledge, is not indexed by RagMonk, and lets an
 interrupted task resume from its current phase instead of restarting. Full detail:
-`.agents/skills/osb/references/state.md`.
+`osb/references/state.md`.
 
 ## Completion criteria
 
@@ -107,7 +107,7 @@ A task is complete when: the final combined-change review is Clean for the curre
 fingerprint; every required acceptance criterion has an independent QA verdict of Pass on
 that same fingerprint; there are no open blocking findings or open evidence gaps;
 knowledge has been consolidated; and RagMonk has been given the opportunity to index the
-result. See `.agents/skills/osb/references/quality.md` §Completion gate.
+result. See `osb/references/quality.md` §Completion gate.
 
 ## What OSB v2 deliberately does not have
 

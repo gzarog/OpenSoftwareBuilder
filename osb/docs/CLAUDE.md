@@ -2,18 +2,28 @@
 
 ## Setup
 
-Copy into your project:
+Copy the `osb/` package into your workspace, then register Claude Code:
+
+```sh
+bash ./osb/install.sh init --host claude
+```
+
+This generates:
 
 ```text
-.agents/skills/osb/          (canonical workflow — unmodified)
-.claude/skills/osb/SKILL.md  (thin wrapper)
-.claude/agents/architect.md
-.claude/agents/implementer.md
-.claude/agents/reviewer.md
-.claude/agents/qa.md
-osb.yaml                     (with models.claude-code.* filled in, or left blank to be
-                               prompted on first run)
+.claude/skills/osb/SKILL.md   (thin wrapper, generated from osb/hosts/claude/skill.md.tmpl)
+.claude/agents/architect.md   (generated from osb/agents/architect.md)
+.claude/agents/implementer.md (generated from osb/agents/implementer.md)
+.claude/agents/reviewer.md    (generated from osb/agents/reviewer.md)
+.claude/agents/qa.md          (generated from osb/agents/qa.md)
 ```
+
+and creates root `osb.yaml` (fill in `models.claude-code.*`, or leave blank to be prompted
+on first run) plus `.osb/state/` and `.osb/knowledge/` if they don't already exist.
+
+Do not hand-edit the generated files above — re-run `bash ./osb/install.sh upgrade` after
+changing `osb/agents/*.md` or `osb/hosts/claude/*` to regenerate them, or `doctor` to
+detect that they've drifted from the source.
 
 ## Invocation
 
@@ -22,10 +32,9 @@ osb.yaml                     (with models.claude-code.* filled in, or left blank
 ```
 
 Claude Code loads `.claude/skills/osb/SKILL.md`, which points at the canonical
-`.agents/skills/osb/SKILL.md` for the actual workflow, then dispatches each role as a
-Claude Code subagent using the Agent tool with `subagent_type` set to `architect`,
-`implementer`, `reviewer`, or `qa`, and `model` set to the model resolved from
-`osb.yaml`.
+`osb/SKILL.md` for the actual workflow, then dispatches each role as a Claude Code
+subagent using the Agent tool with `subagent_type` set to `architect`, `implementer`,
+`reviewer`, or `qa`, and `model` set to the model resolved from `osb.yaml`.
 
 Every role dispatch must use the model resolved from `models.claude-code.<role>` — there
 is no shared or default model across roles:
@@ -53,7 +62,7 @@ Implementer's output or the full architecture.
 ## RagMonk
 
 Claude Code prefers RagMonk's MCP tools when connected in the session. If no RagMonk MCP
-server is configured, it falls back to the RagMonk CLI via Bash. See `docs/RAGMONK.md`.
+server is configured, it falls back to the RagMonk CLI via Bash. See `osb/docs/RAGMONK.md`.
 
 ## Model configuration example
 

@@ -105,10 +105,10 @@ otherwise.
 2. Discard transient/noise entries — superseded assumptions, duplicate discoveries,
    anything that only mattered mid-task.
 3. Write one immutable task record at
-   `.osb/knowledge/tasks/YYYY-MM-DD-<task-slug>.md` (see `templates/knowledge/task.md`).
+   `.osb/knowledge/tasks/YYYY-MM-DD-<task-slug>.md` (see `osb/templates/knowledge/task.md`).
    Task records describe **what happened** and are never edited after creation.
 4. For every component touched, create or update
-   `.osb/knowledge/components/<component>.md` (see `templates/knowledge/component.md`).
+   `.osb/knowledge/components/<component>.md` (see `osb/templates/knowledge/component.md`).
    Component records describe the **current durable state** of that component — edit them
    in place, don't append history to them.
 5. Ensure RagMonk indexes the new/updated files (see `ragmonk.md` §Refresh policy).
