@@ -147,6 +147,9 @@ EXPECTED_PACKAGE_FILES = (
     "scripts/recovery_policy.py",
     "schemas/recovery-event.schema.json",
     "docs/RECOVERY.md",
+    "scripts/run_report.py",
+    "schemas/execution-report.schema.json",
+    "docs/EXECUTION_REPORTS.md",
 )
 
 # Soft size guardrails (bytes). Guidance, not hard architecture requirements.
