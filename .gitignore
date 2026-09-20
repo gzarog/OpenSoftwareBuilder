@@ -14,3 +14,9 @@ osb/.backup/
 # OSB ephemeral per-task execution state (durable knowledge under .osb/knowledge/ is
 # committed; state is safe to leave untracked)
 .osb/state/*.json
+
+# OSB derived/ephemeral artifacts (Next Improvements plan): recomputable from osb.yaml,
+# source repositories, and .osb/state|knowledge — see osb/docs/NEXT_IMPROVEMENTS.md.
+.osb/cache/
+.osb/context/
+.osb/runs/

@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "osb://schemas/impact-plan.schema.json",
+  "title": "OSB task-specific impact plan",
+  "description": "A per-task, per-revision impact/test-selection artifact at .osb/cache/impact/<task-id>.json (Next Improvements Phase 2). Derived and recomputable — never authoritative, never a substitute for the mandatory final combined-change review or final QA on every required AC (osb/references/quality.md). See osb/references/impact.md and osb/docs/IMPACT_AND_TEST_SELECTION.md.",
+  "type": "object",
+  "required": ["task_id", "repositories", "confirmed_impacts", "possible_impacts", "unknowns", "truncated", "affected_repositories", "ac_to_repository_map", "test_plan", "plan_fingerprint"],
+  "additionalProperties": false,
+  "properties": {
+    "task_id": {"type": "string", "minLength": 1},
+    "workspace_manifest_fingerprint": {"type": ["string", "null"]},
+    "repositories": {"type": "array", "items": {"type": "string"}},
+    "source_revisions": {
+      "type": "object",
+      "patternProperties": {"^[A-Za-z0-9_-]+$": {"type": "string"}},
+      "additionalProperties": false
+    },
+    "seeds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["repository_id", "path"],
+        "properties": {
+          "repository_id": {"type": "string"},
+          "path": {"type": "string"},
+          "symbol": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "confirmed_impacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["repository_id", "path", "kind", "evidence"],
+        "properties": {
+          "repository_id": {"type": "string"},
+          "path": {"type": "string"},
+          "symbol": {"type": ["string", "null"]},
+          "kind": {"type": "string", "enum": ["caller", "implementation", "project-reference", "test-dependent", "other"]},
+          "evidence": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "possible_impacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["repository_id", "path", "reason", "confidence"],
+        "properties": {
+          "repository_id": {"type": "string"},
+          "path": {"type": "string"},
+          "symbol": {"type": ["string", "null"]},
+          "reason": {"type": "string", "minLength": 1},
+          "confidence": {"type": "string", "const": "possible"},
+          "question": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["question", "reason"],
+        "properties": {
+          "question": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "truncated": {"type": "boolean"},
+    "affected_repositories": {"type": "array", "items": {"type": "string"}},
+    "suggested_units": {"type": "array", "items": {"type": "string"}},
+    "required_integration_boundaries": {"type": "array", "items": {"type": "string"}},
+    "ac_to_repository_map": {
+      "type": "object",
+      "patternProperties": {
+        "^AC[A-Za-z0-9_-]+$": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+      },
+      "additionalProperties": false
+    },
+    "test_plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "stage", "repository_id", "targets", "command_source", "covers_ac_ids", "reason", "status"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "stage": {"type": "string", "enum": ["intermediate"]},
+          "repository_id": {"type": "string"},
+          "targets": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+          "command_source": {"type": "string", "enum": ["project-configured", "discovered-suggestion"]},
+          "command": {"type": ["string", "null"]},
+          "cwd": {"type": ["string", "null"]},
+          "covers_ac_ids": {"type": "array", "items": {"type": "string"}},
+          "reason": {"type": "string", "minLength": 1},
+          "status": {"type": "string", "enum": ["proposed", "authorized", "executed", "not-executed"]}
+        }
+      }
+    },
+    "plan_fingerprint": {"type": "string", "minLength": 1}
+  }
+}

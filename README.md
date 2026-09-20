@@ -210,6 +210,7 @@ a shared checkout. Efficiency claims are measured, not asserted — see
 | `osb/docs/HOST_COMPATIBILITY.md` | Per-host capability matrix and preflight |
 | `osb/docs/BENCHMARKING.md`, `osb/docs/METRICS.md` | Measurement method and before/after reports |
 | `osb/docs/BASELINE.md` | The pre-migration baseline this plan was implemented against |
+| `osb/docs/NEXT_IMPROVEMENTS.md` | Opt-in discovery, impact/test selection, context broker, recovery, and reporting |
 
 ## License
 

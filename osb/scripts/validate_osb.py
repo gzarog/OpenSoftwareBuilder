@@ -137,6 +137,10 @@ EXPECTED_PACKAGE_FILES = (
     "docs/NEXT_IMPROVEMENTS.md",
     "scripts/workspace_discovery.py",
     "schemas/workspace-manifest.schema.json",
+    "scripts/impact_plan.py",
+    "schemas/impact-plan.schema.json",
+    "references/impact.md",
+    "docs/IMPACT_AND_TEST_SELECTION.md",
 )
 
 # Soft size guardrails (bytes). Guidance, not hard architecture requirements.
