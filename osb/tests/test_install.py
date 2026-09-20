@@ -171,6 +171,24 @@ class InitTests(unittest.TestCase):
         self.assertNotIn("HAND EDITED", agent_path.read_text(), "--force must overwrite the conflicting file")
 
 
+class SpacesInPathTests(unittest.TestCase):
+    """P0-I exit gate: installation and runtime path resolution must work when the
+    workspace (or the osb/ package itself) lives under a path containing spaces."""
+
+    def test_init_and_doctor_work_when_workspace_path_contains_spaces(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            workspace = make_fake_workspace(Path(tmp) / "my osb workspace (2026)")
+            result = run_install(workspace, "init", "--host", "claude")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            for rel in CLAUDE_FILES:
+                self.assertTrue((workspace / rel).is_file(), f"missing {rel}")
+
+            doctor_result = run_install(workspace, "doctor")
+            self.assertIn("models_configured", doctor_result.stdout + doctor_result.stderr + "")
+            # Blocked only on the (expected) blank models — never on path resolution itself.
+            self.assertNotIn("Traceback", doctor_result.stdout + doctor_result.stderr)
+
+
 class ExistingProjectFixtureTests(unittest.TestCase):
     """Simulates the 'existing single-repo project' fixture: a project that already has
     its own osb.yaml and non-OSB files before OSB is introduced."""
