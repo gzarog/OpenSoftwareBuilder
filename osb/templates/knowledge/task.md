@@ -9,6 +9,7 @@ everything. Omit sections that have nothing worth saying.
 
 **Date:** YYYY-MM-DD
 **Component(s):** <component names, or "cross-cutting">
+**Repository/Repositories:** <repository id(s), or omit in single-repo mode>
 **Status:** shipped | reverted | blocked
 
 ## What & why

@@ -97,6 +97,17 @@ With watch mode running, knowledge events OSB appends to
 whenever a checkpoint actually adds new knowledge (never on a checkpoint that adds none —
 see `osb/references/knowledge.md` §Watermark).
 
+## Provenance and unsupported features
+
+OSB tags retrieved/reported knowledge with provenance (repository id, source path,
+source revision, lifecycle status — see `osb/references/knowledge.md` §Provenance and
+freshness). This is bookkeeping OSB does itself in `.osb/knowledge/`; it does not assume
+RagMonk exposes a matching provenance/filter argument. If a future RagMonk feature (e.g.
+server-side staleness filtering) would help, that is a **separate, versioned RagMonk
+dependency proposal** — OSB must not pretend an unsupported MCP/CLI argument exists, and
+must not implement a second indexing/search engine to work around a missing RagMonk
+feature.
+
 ## Failure behavior
 
 If `ragmonk.required: true` and RagMonk is unreachable or this repository is not indexed,
