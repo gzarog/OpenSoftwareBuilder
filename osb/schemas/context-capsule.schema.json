@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "osb://schemas/context-capsule.schema.json",
+  "title": "OSB context capsule",
+  "description": "A minimal, source-verified evidence package for one role/unit dispatch at .osb/context/<task-id>/<role>-<unit>.json (Next Improvements Phase 3). Assembled by osb/scripts/context_broker.py — a file/metadata helper, never a new agent or a substitute for RagMonk. See osb/docs/CONTEXT_BROKER.md.",
+  "type": "object",
+  "required": ["task_id", "role", "required_ac", "constraints", "evidence", "unresolved_questions", "initial_budget_chars", "capsule_fingerprint"],
+  "additionalProperties": false,
+  "properties": {
+    "task_id": {"type": "string", "minLength": 1},
+    "role": {"type": "string", "enum": ["architect", "implementer", "reviewer", "qa"]},
+    "unit_id": {"type": ["string", "null"]},
+    "workspace_manifest_fingerprint": {"type": ["string", "null"]},
+    "impact_plan_fingerprint": {"type": ["string", "null"]},
+    "required_ac": {
+      "type": "object",
+      "patternProperties": {"^AC[A-Za-z0-9_-]+$": {"type": "string", "minLength": 1}},
+      "additionalProperties": false
+    },
+    "constraints": {"type": "array", "items": {"type": "string"}},
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["repository_id", "source_path", "source_revision", "excerpt_ref", "status"],
+        "properties": {
+          "repository_id": {"type": ["string", "null"]},
+          "source_path": {"type": "string"},
+          "source_revision": {"type": "string"},
+          "locator": {"type": ["string", "null"]},
+          "excerpt_ref": {"type": "string", "minLength": 1},
+          "status": {"type": "string", "enum": ["current", "stale"]}
+        }
+      }
+    },
+    "unresolved_questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["question", "reason"],
+        "properties": {
+          "question": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "initial_budget_chars": {"type": "integer", "minimum": 0},
+    "capsule_fingerprint": {"type": "string", "minLength": 1}
+  }
+}

@@ -141,6 +141,9 @@ EXPECTED_PACKAGE_FILES = (
     "schemas/impact-plan.schema.json",
     "references/impact.md",
     "docs/IMPACT_AND_TEST_SELECTION.md",
+    "scripts/context_broker.py",
+    "schemas/context-capsule.schema.json",
+    "docs/CONTEXT_BROKER.md",
 )
 
 # Soft size guardrails (bytes). Guidance, not hard architecture requirements.
