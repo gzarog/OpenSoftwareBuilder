@@ -152,6 +152,16 @@ def check_completion(
     if schema_errors:
         return False, [f"schema: {e}" for e in schema_errors]
 
+    if state.get("phase") == "blocked":
+        reasons.append(
+            "phase is 'blocked' — a blocked run is never reported as complete "
+            "(see osb/docs/RECOVERY.md)"
+        )
+    if state.get("recovery", {}).get("status") == "blocked":
+        reasons.append(
+            f"recovery.status is 'blocked' (last_blocker: {state['recovery'].get('last_blocker')!r})"
+        )
+
     quality = state["quality"]
     required_ac_ids = set(quality["required_ac_ids"])
     acceptance_ids = set(state["acceptance"].keys())

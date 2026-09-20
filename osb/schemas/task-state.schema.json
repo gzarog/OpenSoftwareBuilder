@@ -13,7 +13,7 @@
     "goal": {"type": "string", "minLength": 1},
     "phase": {
       "type": "string",
-      "enum": ["architecture", "implementation", "review", "repair", "qa", "complete"]
+      "enum": ["architecture", "implementation", "review", "repair", "qa", "blocked", "complete"]
     },
     "architecture_checkpoint": {"type": ["string", "null"]},
     "task_profile": {
@@ -116,6 +116,30 @@
         "final_qa_fingerprint": {"type": ["string", "null"]},
         "unverified_ac_ids": {"type": "array", "items": {"type": "string"}},
         "knowledge_consolidated": {"type": "boolean"}
+      }
+    },
+    "recovery": {
+      "type": "object",
+      "description": "Optional bounded-recovery summary (Next Improvements Phase 4). Absent/empty means no repair attempt has been blocked or exhausted. See osb/docs/RECOVERY.md and osb/schemas/recovery-event.schema.json for the underlying append-only event log this summarizes.",
+      "properties": {
+        "status": {"type": "string", "enum": ["ok", "blocked"]},
+        "blocked_role": {"type": ["string", "null"]},
+        "last_blocker": {"type": ["string", "null"]},
+        "events_file": {"type": ["string", "null"]},
+        "attempts": {
+          "type": "object",
+          "patternProperties": {
+            "^.+$": {
+              "type": "object",
+              "properties": {
+                "attempt_count": {"type": "integer", "minimum": 0},
+                "last_failure_signature": {"type": ["string", "null"]},
+                "last_implementation_fingerprint": {"type": ["string", "null"]}
+              }
+            }
+          },
+          "additionalProperties": false
+        }
       }
     }
   }

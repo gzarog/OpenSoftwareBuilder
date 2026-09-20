@@ -144,6 +144,9 @@ EXPECTED_PACKAGE_FILES = (
     "scripts/context_broker.py",
     "schemas/context-capsule.schema.json",
     "docs/CONTEXT_BROKER.md",
+    "scripts/recovery_policy.py",
+    "schemas/recovery-event.schema.json",
+    "docs/RECOVERY.md",
 )
 
 # Soft size guardrails (bytes). Guidance, not hard architecture requirements.
