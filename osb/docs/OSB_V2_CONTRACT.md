@@ -113,6 +113,15 @@ this gate as a deterministic, machine-checkable script against
 runs a role itself, but it does mean completion cannot be reported on structurally invalid
 or stale state.
 
+## Next improvements (opt-in)
+
+Multi-repository discovery, task-specific impact analysis and test selection, an
+evidence-aware context broker, stronger failure recovery, and per-task execution reports
+extend this contract without changing any invariant above — see
+`osb/docs/NEXT_IMPROVEMENTS.md` for the one-page index and artifact-ownership rules. Every
+key they add to `osb.yaml` is optional; a project with none of them set keeps exactly the
+behavior described above.
+
 ## What OSB v2 deliberately does not have
 
 - its own AI runtime, provider abstraction, or executor framework

@@ -45,6 +45,11 @@ execution:
   checkpoint_state: true
   delta_repairs: true
   # isolation: shared        # or: worktree (Phase 4) — default remains shared
+  # Opt-in bounded recovery/retry limits (Next Improvements, Phase 4). See
+  # osb/docs/RECOVERY.md. Omit for the documented safe defaults.
+  # max_repair_attempts_per_finding: 3
+  # max_identical_failure_repeats: 2
+  # max_context_expansions_per_question: 5
 
 knowledge:
   enabled: true
@@ -56,3 +61,34 @@ ragmonk:
   required: true
   retrieve_before_architecture: true
   refresh_after_knowledge_change: true
+
+# Opt-in repository discovery (Next Improvements, Phase 1). Omit to keep explicit-only
+# multi-repo config (workspace.repositories above) or single-repo mode. See
+# osb/docs/MULTI_REPO.md §Discovery.
+# workspace:
+#   discovery:
+#     enabled: true
+#     max_depth: 4
+#     require_confirmation: true
+#     exclude: [.osb, node_modules, .venv, bin, obj]
+
+# Opt-in task-specific impact analysis and test selection (Next Improvements, Phase 2).
+# See osb/docs/IMPACT_AND_TEST_SELECTION.md.
+# impact:
+#   enabled: true
+#   max_depth: 3
+#   include_tests: true
+
+# Opt-in evidence-aware context broker (Next Improvements, Phase 3). See
+# osb/docs/CONTEXT_BROKER.md.
+# context:
+#   broker_enabled: true
+#   reuse_unchanged_sources: true
+#   initial_max_chars: 6000
+
+# Opt-in per-task execution reports (Next Improvements, Phase 5). See
+# osb/docs/EXECUTION_REPORTS.md.
+# reporting:
+#   enabled: true
+#   write_json: true
+#   write_markdown: true
