@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "osb://schemas/task-state.schema.json",
+  "title": "OSB task state",
+  "description": "Compact, mutable, resumable execution state at .osb/state/<task-id>.json. See osb/references/state.md.",
+  "type": "object",
+  "required": [
+    "task_id", "goal", "phase", "acceptance", "units", "review", "qa", "quality"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "task_id": {"type": "string", "minLength": 1},
+    "goal": {"type": "string", "minLength": 1},
+    "phase": {
+      "type": "string",
+      "enum": ["architecture", "implementation", "review", "repair", "qa", "complete"]
+    },
+    "architecture_checkpoint": {"type": ["string", "null"]},
+    "task_profile": {
+      "type": ["string", "null"],
+      "enum": ["small-fix", "feature", "cross-service", "high-risk", null]
+    },
+    "task_profile_rationale": {"type": ["string", "null"]},
+    "risk_flags": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "acceptance": {
+      "type": "object",
+      "patternProperties": {
+        "^AC[A-Za-z0-9_-]+$": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "units": {
+      "type": "object",
+      "patternProperties": {
+        "^U[A-Za-z0-9_-]+$": {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": {"type": "string", "enum": ["pending", "in-progress", "complete", "blocked"]},
+            "files": {"type": "array", "items": {"type": "string"}},
+            "checkpoint": {"type": ["string", "null"]},
+            "repository_id": {"type": ["string", "null"]}
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "review": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {"type": "string", "enum": ["pending", "clean", "findings", "needs-evidence"]},
+        "scope": {"type": "string", "enum": ["delta", "final-combined-change"]},
+        "reviewed_revision": {"type": ["string", "null"]},
+        "open": {"type": "array", "items": {"type": "string"}},
+        "resolved": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "qa": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {"type": "string", "enum": ["pending", "pass", "fail", "needs-evidence"]},
+        "failed": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "knowledge_watermark": {"type": ["string", "null"]},
+    "workspace": {
+      "type": "object",
+      "description": "Present only when the task spans more than one repository (Phase 3).",
+      "required": ["mode", "repositories"],
+      "properties": {
+        "mode": {"type": "string", "enum": ["single-repo", "multi-repo"]},
+        "workspace_fingerprint": {"type": ["string", "null"]},
+        "repositories": {
+          "type": "object",
+          "patternProperties": {
+            "^[A-Za-z0-9_-]+$": {
+              "type": "object",
+              "required": ["path", "base_revision"],
+              "properties": {
+                "path": {"type": "string"},
+                "depends_on": {"type": "array", "items": {"type": "string"}},
+                "base_revision": {"type": "string"},
+                "head_revision": {"type": ["string", "null"]},
+                "patch_fingerprint": {"type": ["string", "null"]},
+                "changed_files": {"type": "array", "items": {"type": "string"}},
+                "status": {"type": "string", "enum": ["pending", "in-progress", "complete", "blocked"]}
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "required": [
+        "unresolved_context_requests", "required_ac_ids", "task_base_revision",
+        "current_patch_fingerprint", "final_review_fingerprint", "final_qa_fingerprint",
+        "unverified_ac_ids"
+      ],
+      "properties": {
+        "unresolved_context_requests": {"type": "array", "items": {"type": "object"}},
+        "required_ac_ids": {"type": "array", "items": {"type": "string"}},
+        "task_base_revision": {"type": "string", "minLength": 1},
+        "current_patch_fingerprint": {"type": "string", "minLength": 1},
+        "final_review_fingerprint": {"type": ["string", "null"]},
+        "final_qa_fingerprint": {"type": ["string", "null"]},
+        "unverified_ac_ids": {"type": "array", "items": {"type": "string"}},
+        "knowledge_consolidated": {"type": "boolean"}
+      }
+    }
+  }
+}

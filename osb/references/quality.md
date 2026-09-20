@@ -122,3 +122,13 @@ verification stage rather than resuming at completion.
 
 This gate protects the token-saving optimizations elsewhere in OSB — it is deliberately
 the one place completion cannot be inferred from a narrow, cheap check.
+
+`osb/scripts/verify_task.py check <state-file> --repo-root . [--evidence <qa-result.json>]`
+implements this gate mechanically: it validates the state file against
+`osb/schemas/task-state.schema.json`, recomputes the current patch fingerprint
+(§Fingerprinting) and compares it against `final_review_fingerprint`/
+`final_qa_fingerprint`, and — when a QA evidence file is supplied — cross-checks every
+required AC has a `pass` verdict on that same revision. It is a deterministic checker, not
+a runtime: it never dispatches a role and cannot itself prove a command actually ran (see
+`state.md` for the schema and `workflow.md` for how the coordinator calls it before final
+review, before QA, on resume, and immediately before reporting completion).

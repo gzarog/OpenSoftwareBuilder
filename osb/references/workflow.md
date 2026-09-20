@@ -55,7 +55,9 @@ Before starting anything, check whether an active task state file exists for thi
 `.osb/state/<task-id>.json` with `phase != complete`. If so, resume per `state.md` §Resume
 support instead of restarting from Architect — but first recompute the current patch
 fingerprint and compare it against any persisted `review`/`qa` fingerprints
-(`quality.md` §Fingerprinting). If they differ (e.g. the working tree changed outside this
+(`quality.md` §Fingerprinting). `osb/scripts/verify_task.py fingerprint <repo-root>
+<task_base_revision>` computes this deterministically when a host wants to shell out
+rather than recompute it inline. If they differ (e.g. the working tree changed outside this
 run), the persisted review/QA verdicts are stale: re-enter at step 9 or 10 rather than
 resuming at completion. Do not rerun roles whose phase has already passed and whose
 verdicts are still fresh.
@@ -240,10 +242,12 @@ records, and let RagMonk index them only because durable knowledge actually chan
 
 ## Step 14 — Complete
 
-Before reporting completion, confirm the completion gate in `quality.md` §Completion gate:
-final review and QA fingerprints match the current patch fingerprint, no open blocking
-findings or evidence gaps, every required AC independently `pass`, knowledge consolidated.
-Then report to the user: task summary, changed files, acceptance criteria status, and the
+Before reporting completion, confirm the completion gate in `quality.md` §Completion gate
+— run `osb/scripts/verify_task.py check .osb/state/<task-id>.json --repo-root . --evidence
+<qa-result>` (or the equivalent inline check) and do not report completion unless it
+reports the gate holds: final review and QA fingerprints match the current patch
+fingerprint, no open blocking findings or evidence gaps, every required AC independently
+`pass`, knowledge consolidated. Then report to the user: task summary, changed files, acceptance criteria status, and the
 task-record path. If the host exposes usage figures, optionally record proxies for token
 efficiency (input/output tokens or prompt/diff/tool-output chars per phase, RagMonk chars
 retrieved, Implementers spawned, repair-loop counts) — this is advisory measurement, never

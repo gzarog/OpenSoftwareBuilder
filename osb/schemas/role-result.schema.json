@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "osb://schemas/role-result.schema.json",
+  "title": "OSB role result",
+  "description": "Compact result shape returned by Implementer, Reviewer, or QA (osb/references/handoff.md, roles.md). The Architect returns a Markdown document, not JSON/YAML, and has no schema here.",
+  "$defs": {
+    "knowledgeEntry": {
+      "type": "object",
+      "required": ["type", "summary"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "decision", "constraint", "discovery", "gotcha", "assumption",
+            "assumption-invalidated", "review-finding", "qa-result", "follow-up"
+          ]
+        },
+        "summary": {"type": "string", "minLength": 1},
+        "component": {"type": "string"},
+        "files": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "evidenceEntry": {
+      "type": "object",
+      "description": "A single AC's QA verdict. 'not-run'/'blocked'/'inconclusive' are valid results and are never conflated with pass (osb/references/quality.md §Final-revision QA gate).",
+      "required": ["result", "evidence"],
+      "properties": {
+        "result": {"type": "string", "enum": ["pass", "fail", "blocked", "not-run", "inconclusive"]},
+        "evidence": {"type": "string", "minLength": 1},
+        "command": {"type": "string"},
+        "exit_status": {"type": ["integer", "string", "null"]},
+        "tested_fingerprint": {"type": "string"},
+        "artifact": {"type": "string"}
+      }
+    },
+    "implementerResult": {
+      "type": "object",
+      "required": ["status"],
+      "additionalProperties": false,
+      "properties": {
+        "status": {"type": "string", "enum": ["done", "blocked", "needs-evidence"]},
+        "changed": {"type": "array", "items": {"type": "string"}},
+        "verify": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["command", "result"],
+            "properties": {
+              "command": {"type": "string"},
+              "result": {"type": "string", "enum": ["pass", "fail"]}
+            }
+          }
+        },
+        "knowledge": {"type": "array", "items": {"$ref": "#/$defs/knowledgeEntry"}},
+        "blocker": {"type": ["string", "null"]},
+        "context_request": {"type": ["object", "null"]}
+      }
+    },
+    "reviewerResult": {
+      "type": "object",
+      "required": ["status", "scope"],
+      "additionalProperties": false,
+      "properties": {
+        "status": {"type": "string", "enum": ["clean", "findings", "needs-evidence"]},
+        "scope": {"type": "string", "enum": ["delta", "final-combined-change"]},
+        "revision": {"type": "string"},
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "severity", "file", "ac", "issue", "fix"],
+            "properties": {
+              "id": {"type": "string"},
+              "severity": {"type": "string", "enum": ["blocker", "nit"]},
+              "file": {"type": "string"},
+              "ac": {"type": "string"},
+              "issue": {"type": "string"},
+              "fix": {"type": "string"}
+            }
+          }
+        },
+        "knowledge": {"type": "array", "items": {"$ref": "#/$defs/knowledgeEntry"}},
+        "context_request": {"type": ["object", "null"]}
+      }
+    },
+    "qaResult": {
+      "type": "object",
+      "required": ["status", "revision"],
+      "additionalProperties": false,
+      "properties": {
+        "status": {"type": "string", "enum": ["pass", "fail", "needs-evidence"]},
+        "revision": {"type": "string", "minLength": 1},
+        "ac": {
+          "type": "object",
+          "patternProperties": {
+            "^AC[A-Za-z0-9_-]+$": {"$ref": "#/$defs/evidenceEntry"}
+          },
+          "additionalProperties": false
+        },
+        "failed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ac", "expected", "actual"],
+            "properties": {
+              "ac": {"type": "string"},
+              "expected": {"type": "string"},
+              "actual": {"type": "string"}
+            }
+          }
+        },
+        "knowledge": {"type": "array", "items": {"$ref": "#/$defs/knowledgeEntry"}},
+        "context_request": {"type": ["object", "null"]}
+      }
+    }
+  },
+  "oneOf": [
+    {"$ref": "#/$defs/implementerResult"},
+    {"$ref": "#/$defs/reviewerResult"},
+    {"$ref": "#/$defs/qaResult"}
+  ]
+}

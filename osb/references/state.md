@@ -27,12 +27,20 @@ authoritative project memory.
 
 ## Task state schema
 
+The machine-checkable contract is `osb/schemas/task-state.schema.json`
+(`osb/scripts/verify_task.py` validates every task state file against it before trusting
+it — see `quality.md` §Completion gate). This section is the human-readable walkthrough of
+the same shape:
+
 ```json
 {
   "task_id": "OSB-2026-0919-001",
   "goal": "Add optimistic locking to CustomerRepository",
   "phase": "review",
   "architecture_checkpoint": "CP1",
+  "task_profile": "feature",
+  "task_profile_rationale": "single-repo change touching one component, no cross-service contract",
+  "risk_flags": [],
   "acceptance": {
     "AC1": "existing public API remains unchanged",
     "AC2": "concurrent update conflict returns expected domain error",
@@ -69,6 +77,11 @@ authoritative project memory.
 ```
 
 `phase` is one of: `architecture`, `implementation`, `review`, `repair`, `qa`, `complete`.
+
+`task_profile` / `task_profile_rationale` / `risk_flags` record the coordinator's
+deterministic-first classification (`workflow.md` §Task classification) — they select
+initial context/execution strategy only and never weaken the AC set, the mandatory final
+review, or independent QA. `null` until the coordinator classifies the task.
 
 `knowledge_watermark` records the last checkpoint whose durable knowledge (if any) has
 already been made available for retrieval — see `knowledge.md` §Watermark.

@@ -107,7 +107,11 @@ A task is complete when: the final combined-change review is Clean for the curre
 fingerprint; every required acceptance criterion has an independent QA verdict of Pass on
 that same fingerprint; there are no open blocking findings or open evidence gaps;
 knowledge has been consolidated; and RagMonk has been given the opportunity to index the
-result. See `osb/references/quality.md` §Completion gate.
+result. See `osb/references/quality.md` §Completion gate. `osb/scripts/verify_task.py` implements
+this gate as a deterministic, machine-checkable script against
+`osb/schemas/task-state.schema.json` and `osb/schemas/role-result.schema.json` — it never
+runs a role itself, but it does mean completion cannot be reported on structurally invalid
+or stale state.
 
 ## What OSB v2 deliberately does not have
 

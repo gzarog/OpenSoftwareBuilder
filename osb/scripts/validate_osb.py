@@ -20,6 +20,9 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - Python < 3.11 fallback
     import tomli as tomllib  # type: ignore[no-redef]
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import schema_validate  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent.parent
 OSB_DIR = ROOT / "osb"
 
@@ -102,6 +105,10 @@ EXPECTED_PACKAGE_FILES = (
     "scripts/install.py",
     "scripts/generate_hosts.py",
     "scripts/validate_osb.py",
+    "scripts/schema_validate.py",
+    "scripts/verify_task.py",
+    "schemas/task-state.schema.json",
+    "schemas/role-result.schema.json",
     "templates/osb.yaml",
     "templates/state/task.json",
     "templates/knowledge/task.md",
@@ -498,6 +505,40 @@ def check_manifest() -> None:
             fail(f"osb/manifest.json: missing '{key}'")
 
 
+def check_state_template_matches_schema() -> None:
+    """osb/templates/state/task.json must itself validate against
+    task-state.schema.json (P0-C 1.3) — a schema/template mismatch here would mean every
+    task created from this template starts out already non-conformant."""
+
+    schema_path = OSB_DIR / "schemas/task-state.schema.json"
+    template_path = OSB_DIR / "templates/state/task.json"
+    if not schema_path.is_file():
+        fail("missing osb/schemas/task-state.schema.json")
+        return
+    if not template_path.is_file():
+        fail("missing osb/templates/state/task.json")
+        return
+    try:
+        schema = json.loads(read(schema_path))
+        template = json.loads(read(template_path))
+    except ValueError as exc:
+        fail(f"task-state schema/template is not valid JSON: {exc}")
+        return
+    for error in schema_validate.validate(template, schema):
+        fail(f"osb/templates/state/task.json does not conform to task-state.schema.json: {error}")
+
+
+def check_role_result_schema_is_valid_json() -> None:
+    path = OSB_DIR / "schemas/role-result.schema.json"
+    if not path.is_file():
+        fail("missing osb/schemas/role-result.schema.json")
+        return
+    try:
+        json.loads(read(path))
+    except ValueError as exc:
+        fail(f"osb/schemas/role-result.schema.json is not valid JSON: {exc}")
+
+
 def check_workspace_exceptions_preserved() -> None:
     """Root osb.yaml / .osb/{state,knowledge} are workspace-owned exceptions to the
     single-folder package rule (P0-I) — flag if osb.yaml looks auto-clobbered."""
@@ -522,6 +563,8 @@ def main() -> int:
     check_quality_contract()
     check_size_guards()
     check_manifest()
+    check_state_template_matches_schema()
+    check_role_result_schema_is_valid_json()
     check_workspace_exceptions_preserved()
 
     if warnings:
