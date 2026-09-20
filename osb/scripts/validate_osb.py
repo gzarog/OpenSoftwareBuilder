@@ -118,6 +118,7 @@ EXPECTED_PACKAGE_FILES = (
     "docs/BENCHMARKING.md",
     "scripts/host_preflight.py",
     "docs/HOST_COMPATIBILITY.md",
+    "docs/UPGRADE.md",
     "schemas/task-state.schema.json",
     "schemas/role-result.schema.json",
     "templates/osb.yaml",

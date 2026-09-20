@@ -75,7 +75,8 @@ in `osb.yaml` (OSB still uses it opportunistically when reachable).
 
 Do not assume `/osb` works on a host or host version that hasn't been smoke-tested — see
 `osb/docs/HOST_COMPATIBILITY.md`. Run `bash ./osb/install.sh doctor` at any time to check
-that registration, models, and RagMonk are still in a working state.
+that registration, models, and RagMonk are still in a working state. See
+`osb/docs/UPGRADE.md` for replacing `osb/` with a newer version later.
 
 ## What lives where after setup
 

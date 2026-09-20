@@ -22,6 +22,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import generate_hosts  # noqa: E402
+import host_preflight  # noqa: E402
+import yaml_lite  # noqa: E402
+import workspace_validate  # noqa: E402
 
 PACKAGE_VERSION = "2.1.0"
 ALL_HOSTS = ("claude", "codex", "copilot")
@@ -185,14 +188,32 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             warnings.append(f"{rel}: missing (created automatically on first use)")
 
     current_package_hashes = collect_package_file_hashes()
-    if manifest.get("package_files") and manifest["package_files"] != current_package_hashes:
+    package_version_current = manifest.get("package_version")
+    if package_version_current and package_version_current != PACKAGE_VERSION:
+        warnings.append(
+            f"osb/ package version is {PACKAGE_VERSION}, last recorded install was "
+            f"{package_version_current} — run `upgrade` to regenerate adapters for the current package"
+        )
+    elif manifest.get("package_files") and manifest["package_files"] != current_package_hashes:
         warnings.append("osb/ package contents differ from the last recorded install — run `upgrade` to sync generated adapters")
 
-    ragmonk_available = shutil.which("ragmonk") is not None
-    if not ragmonk_available:
-        warnings.append("ragmonk: CLI not found on PATH — status unknown/unverified (MCP access, if configured in the host, is not checked by this script)")
+    if osb_yaml.is_file():
+        workspace_cfg = yaml_lite.extract_key(osb_yaml.read_text(encoding="utf-8"), "workspace")
+        if workspace_cfg:
+            for err in workspace_validate.validate_workspace(workspace_cfg, WORKSPACE_ROOT):
+                blocked.append(f"workspace: {err}")
 
-    print(f"OSB doctor — package {manifest.get('package_version', 'unknown')}, hosts: {', '.join(manifest['hosts_registered'])}")
+    # Per-host capability preflight (Phase 7) — 'unknown' for a mandatory capability is
+    # folded in as a warning here (doctor is advisory), never silently treated as pass.
+    for host in manifest["hosts_registered"]:
+        report = host_preflight.run_preflight(WORKSPACE_ROOT, host)
+        for name, result in report["checks"].items():
+            if result["status"] == "blocked":
+                blocked.append(f"{host}/{name}: {result['detail']}")
+            elif result["status"] == "unknown":
+                warnings.append(f"{host}/{name}: unknown/unverified — {result['detail']}")
+
+    print(f"OSB doctor — package {manifest.get('package_version', 'unknown')} (installed py: {PACKAGE_VERSION}), hosts: {', '.join(manifest['hosts_registered'])}")
     for w in warnings:
         print(f"  warning: {w}")
     for b in blocked:
@@ -231,11 +252,17 @@ def cmd_upgrade(args: argparse.Namespace) -> int:
             print("No hosts left to upgrade after excluding conflicts.")
             return 1
 
+    recorded_version = manifest.get("package_version", "unknown")
     if args.dry_run:
-        print(f"Dry run: would regenerate for host(s) {', '.join(hosts)}:")
+        print(f"Dry run: installed version {recorded_version} -> package version {PACKAGE_VERSION}")
+        print(f"Would regenerate for host(s) {', '.join(hosts)}:")
         for rel in changes:
-            print(f"  would write: {rel}")
-        print("No files were modified (--dry-run).")
+            path = WORKSPACE_ROOT / rel
+            verb = "write (new)" if not path.exists() else "overwrite"
+            print(f"  would {verb}: {rel}")
+        if conflicts:
+            print("Would skip (conflicting, pass --force to include): " + ", ".join(conflicts))
+        print("No files were modified (--dry-run). osb.yaml, .osb/state/, and .osb/knowledge/ are never touched by upgrade.")
         return 0
 
     backup_dir = OSB_DIR / ".backup" / time.strftime("%Y%m%dT%H%M%S")
@@ -256,7 +283,7 @@ def cmd_upgrade(args: argparse.Namespace) -> int:
     manifest["package_files"] = collect_package_file_hashes()
     save_manifest(manifest)
 
-    print(f"Upgraded generated adapters for host(s): {', '.join(hosts)} (backup: {backup_dir})")
+    print(f"Upgraded {recorded_version} -> {PACKAGE_VERSION} for host(s): {', '.join(hosts)} (backup: {backup_dir})")
     if conflicts:
         print("Skipped (conflicting, unforced): " + ", ".join(conflicts))
     return 0

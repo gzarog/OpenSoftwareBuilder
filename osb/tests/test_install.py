@@ -91,10 +91,25 @@ class InitTests(unittest.TestCase):
         self.assertEqual(manifest_before["generated_files"], manifest_after["generated_files"])
         self.assertEqual(knowledge_file.read_text(), "# widget\n\ncurrent shape: durable knowledge\n")
 
-    def test_doctor_passes_after_init(self) -> None:
+    def test_doctor_passes_after_init_with_models_filled_in(self) -> None:
         run_install(self.workspace, "init", "--host", "all")
+        osb_yaml = self.workspace / "osb.yaml"
+        text = osb_yaml.read_text()
+        for host_key in ("claude-code", "codex", "copilot"):
+            text = text.replace(
+                f"{host_key}:\n    architect:\n    implementer:\n    reviewer:\n    qa:",
+                f"{host_key}:\n    architect: some-model\n    implementer: some-model\n    reviewer: some-model\n    qa: some-model",
+            )
+        osb_yaml.write_text(text, encoding="utf-8")
+
         result = run_install(self.workspace, "doctor")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_doctor_blocked_when_models_are_blank(self) -> None:
+        run_install(self.workspace, "init", "--host", "claude")
+        result = run_install(self.workspace, "doctor")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("models_configured", result.stdout)
 
     def test_doctor_blocked_before_init(self) -> None:
         result = run_install(self.workspace, "doctor")
@@ -109,6 +124,38 @@ class InitTests(unittest.TestCase):
         after = (self.workspace / ".claude/agents/architect.md").read_text()
         self.assertEqual(before, after)
         self.assertIn("Dry run", result.stdout)
+
+    def test_doctor_warns_on_recorded_version_mismatch(self) -> None:
+        run_install(self.workspace, "init", "--host", "claude")
+        manifest_path = self.workspace / "osb/manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["package_version"] = "0.0.1-old"
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+        result = run_install(self.workspace, "doctor")
+        self.assertIn("0.0.1-old", result.stdout)
+
+    def test_upgrade_dry_run_shows_version_transition(self) -> None:
+        run_install(self.workspace, "init", "--host", "claude")
+        manifest_path = self.workspace / "osb/manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["package_version"] = "0.0.1-old"
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+        result = run_install(self.workspace, "upgrade", "--host", "claude", "--dry-run")
+        self.assertIn("0.0.1-old", result.stdout)
+
+    def test_upgrade_never_touches_osb_yaml_state_or_knowledge(self) -> None:
+        run_install(self.workspace, "init", "--host", "claude")
+        custom_yaml = (self.workspace / "osb.yaml").read_text() + "\n# custom trailing comment\n"
+        (self.workspace / "osb.yaml").write_text(custom_yaml, encoding="utf-8")
+        knowledge_file = self.workspace / ".osb/knowledge/components/widget.md"
+        knowledge_file.write_text("durable\n", encoding="utf-8")
+
+        result = run_install(self.workspace, "upgrade", "--host", "claude")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual((self.workspace / "osb.yaml").read_text(), custom_yaml)
+        self.assertEqual(knowledge_file.read_text(), "durable\n")
 
     def test_upgrade_flags_hand_edited_generated_file_as_conflict(self) -> None:
         run_install(self.workspace, "init", "--host", "claude")
