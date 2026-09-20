@@ -197,6 +197,21 @@ only the requested evidence and let it continue (`quality.md` §Context expansio
 triggers) — do not treat that as a failure. On each unit's completion, save CP2 (or CP3 if
 blocked) and advance the knowledge watermark if new knowledge was reported.
 
+### Optional worktree isolation
+
+When `osb.yaml` → `execution.isolation: worktree` is set (default remains `shared`),
+concurrent Implementers never share one checkout: the coordinator creates a dedicated Git
+worktree + branch per unit via `osb/scripts/worktree_guard.py` in the **owning
+repository**, gives each unit its own file-ownership boundary and test output, and
+serializes edits to shared generated files/schema locks/migration registries with the same
+script's cooperative lock helper. Successful units are integrated in dependency order
+(`osb/scripts/worktree_guard.py integrate`); a conflict is reported and the merge aborted
+rather than auto-resolved, leaving the repository clean for a human/coordinator decision.
+Integration **invalidates any pre-integration review/QA approval** — the final combined-
+change review and full QA in steps 11–12 always run against the actual integrated
+workspace, never against a pre-integration branch. OSB never removes a worktree or branch
+it did not create, and never discards uncommitted work without an explicit force.
+
 ### Multi-repository tasks
 
 When `osb.yaml` → `workspace.mode: multi-repo` is set, steps 7–14 run across every

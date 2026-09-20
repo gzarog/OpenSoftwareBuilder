@@ -110,6 +110,7 @@ EXPECTED_PACKAGE_FILES = (
     "scripts/classify_task.py",
     "scripts/yaml_lite.py",
     "scripts/workspace_validate.py",
+    "scripts/worktree_guard.py",
     "schemas/task-state.schema.json",
     "schemas/role-result.schema.json",
     "templates/osb.yaml",
