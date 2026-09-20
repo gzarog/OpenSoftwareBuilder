@@ -1,0 +1,33 @@
+{
+  "fixture_id": "changed-working-tree",
+  "description": "Final review and QA both passed, then an untracked implementation file changes before completion is reported (or is discovered on resume).",
+  "goal": "Add pagination to the orders list endpoint",
+  "scenario": {
+    "files_estimate": 3,
+    "repositories": 1,
+    "acceptance_criteria_count": 2
+  },
+  "expected_task_profile": "feature",
+  "persisted_state_before_change": {
+    "phase": "complete",
+    "quality": {
+      "required_ac_ids": ["AC1", "AC2"],
+      "task_base_revision": "fp-base-0001",
+      "current_patch_fingerprint": "fp-8a3c1e",
+      "final_review_fingerprint": "fp-8a3c1e",
+      "final_qa_fingerprint": "fp-8a3c1e",
+      "unverified_ac_ids": [],
+      "unresolved_context_requests": []
+    }
+  },
+  "working_tree_change_after_verdicts": {
+    "changed_file": "src/OrdersController.cs",
+    "change_description": "an additional edit made after QA passed, not covered by any review/QA verdict"
+  },
+  "recomputed_fingerprint": "fp-9d4f2b",
+  "expected_behavior": [
+    "current_patch_fingerprint (fp-9d4f2b) no longer equals final_review_fingerprint/final_qa_fingerprint (fp-8a3c1e)",
+    "prior review/QA verdicts are stale and must not be reused",
+    "re-enter at the final combined-change review before completion can be reported again"
+  ]
+}

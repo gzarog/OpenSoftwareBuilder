@@ -1,0 +1,31 @@
+{
+  "task_id": "OSB-YYYY-MMDD-NNN",
+  "goal": "<one-line task goal>",
+  "phase": "architecture",
+  "architecture_checkpoint": null,
+  "task_profile": null,
+  "task_profile_rationale": null,
+  "risk_flags": [],
+  "acceptance": {},
+  "units": {},
+  "review": {
+    "status": "pending",
+    "open": [],
+    "resolved": []
+  },
+  "qa": {
+    "status": "pending",
+    "failed": []
+  },
+  "knowledge_watermark": null,
+  "quality": {
+    "unresolved_context_requests": [],
+    "required_ac_ids": [],
+    "task_base_revision": "<commit-or-fingerprint-at-cp0>",
+    "current_patch_fingerprint": "<commit-or-fingerprint-at-cp0>",
+    "final_review_fingerprint": null,
+    "final_qa_fingerprint": null,
+    "unverified_ac_ids": [],
+    "knowledge_consolidated": false
+  }
+}

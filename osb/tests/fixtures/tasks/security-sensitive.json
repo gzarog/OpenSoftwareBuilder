@@ -1,0 +1,21 @@
+{
+  "fixture_id": "security-sensitive",
+  "description": "Change to payment authorization logic touching money movement and auth checks.",
+  "goal": "Add per-merchant transaction limits to the payment authorization path",
+  "scenario": {
+    "files_estimate": 4,
+    "repositories": 1,
+    "cross_service_contracts": false,
+    "migrations": false,
+    "security_sensitive": true,
+    "touches_auth_or_payments": true,
+    "acceptance_criteria_count": 4
+  },
+  "expected_task_profile": "feature",
+  "expected_risk_flags": ["high-risk"],
+  "expected_behavior": [
+    "mandatory explicit threat/impact questions",
+    "focused security/data-integrity tests",
+    "risk flag only escalates review/test attention, never weakens the AC set"
+  ]
+}

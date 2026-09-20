@@ -1,0 +1,20 @@
+{
+  "fixture_id": "multi-file-feature",
+  "description": "New optimistic-locking feature spanning repository, service, and API layers in one repo.",
+  "goal": "Add optimistic locking to CustomerRepository",
+  "scenario": {
+    "files_estimate": 6,
+    "repositories": 1,
+    "cross_service_contracts": false,
+    "migrations": false,
+    "security_sensitive": false,
+    "acceptance_criteria_count": 3
+  },
+  "expected_task_profile": "feature",
+  "expected_risk_flags": [],
+  "expected_behavior": [
+    "Architect-led units",
+    "component-level retrieval",
+    "relevant integration testing"
+  ]
+}

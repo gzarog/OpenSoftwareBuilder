@@ -1,0 +1,20 @@
+{
+  "fixture_id": "single-file-bug",
+  "description": "One-line null-check bug in a single file, no interface change.",
+  "goal": "Fix null-reference crash in CustomerRepository.Update",
+  "scenario": {
+    "files_estimate": 1,
+    "repositories": 1,
+    "cross_service_contracts": false,
+    "migrations": false,
+    "security_sensitive": false,
+    "acceptance_criteria_count": 1
+  },
+  "expected_task_profile": "small-fix",
+  "expected_risk_flags": [],
+  "expected_behavior": [
+    "one Implementer by default",
+    "smallest relevant RagMonk query",
+    "targeted build/test first"
+  ]
+}

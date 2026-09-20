@@ -1,0 +1,147 @@
+{
+  "generated_files": {
+    ".agents/skills/osb/SKILL.md": {
+      "package_version": "2.1.0",
+      "sha256": "da4a81061feff145b3c4115e39adf565d0f6aa98bf6179084194938f0efc1313"
+    },
+    ".claude/agents/architect.md": {
+      "package_version": "2.1.0",
+      "sha256": "f14c0bdec2b07833c378b6264e009804b6d68ec20cae4e90d1e65a7958c149ba"
+    },
+    ".claude/agents/implementer.md": {
+      "package_version": "2.1.0",
+      "sha256": "b810256010d5ed26256792153a41888706381069f4011e8e5ff8e3b27640ef32"
+    },
+    ".claude/agents/qa.md": {
+      "package_version": "2.1.0",
+      "sha256": "743b0acf062041513a728ea4d5b10cefb808931224b5218ee5e06474d8b4355c"
+    },
+    ".claude/agents/reviewer.md": {
+      "package_version": "2.1.0",
+      "sha256": "5ac4be8d824342ec342516999b8c3395c60ff6744428dcd9d2ebce49d747a691"
+    },
+    ".claude/skills/osb/SKILL.md": {
+      "package_version": "2.1.0",
+      "sha256": "f8403bea40337686cb3d1e9def0289dd0c027f71659ed76afb11c061c88fec04"
+    },
+    ".codex/agents/architect.toml": {
+      "package_version": "2.1.0",
+      "sha256": "971147c89cc3e948224257f9bb162b8d0d70e93f3c57f7d6200dfdafcc123758"
+    },
+    ".codex/agents/implementer.toml": {
+      "package_version": "2.1.0",
+      "sha256": "ad46c2186f5455ccc412cbd814ed018f0130d4d6bfd4d894e686a5455d61f586"
+    },
+    ".codex/agents/qa.toml": {
+      "package_version": "2.1.0",
+      "sha256": "27f63260a52cc5f0a53e6aa8f73894da5c9b214f58456d57594498184903c86f"
+    },
+    ".codex/agents/reviewer.toml": {
+      "package_version": "2.1.0",
+      "sha256": "dfb0f91037963a80d68d548fabe2161cc857078fed2e1e5e99c87e15f3dc1326"
+    },
+    ".github/agents/architect.agent.md": {
+      "package_version": "2.1.0",
+      "sha256": "121851d05575ddfc04bbb4b17018ad0fc5e76cd82508c837c4f4c7655d41e1e0"
+    },
+    ".github/agents/implementer.agent.md": {
+      "package_version": "2.1.0",
+      "sha256": "593d5ee0bec4f7e24493ca38bdc96cb3466de26c56d526896f9b28fd508b6b6c"
+    },
+    ".github/agents/qa.agent.md": {
+      "package_version": "2.1.0",
+      "sha256": "3c8bc2f7b8a36f571822ffff6442919b3284023b830fb08b0243f723357c3931"
+    },
+    ".github/agents/reviewer.agent.md": {
+      "package_version": "2.1.0",
+      "sha256": "07feddf676597b2a010095e884e028fd67e53519dfb40ec9dc212a80139dd3f1"
+    },
+    ".github/copilot-instructions.md": {
+      "package_version": "2.1.0",
+      "sha256": "e27da82c5a4aa9d11a6c051bae25bcfb12abad3c52de655129e7a2da64d04734"
+    }
+  },
+  "hosts_registered": [
+    "claude",
+    "codex",
+    "copilot"
+  ],
+  "package_files": {
+    "osb/SKILL.md": "da4a81061feff145b3c4115e39adf565d0f6aa98bf6179084194938f0efc1313",
+    "osb/agents/architect.md": "f14c0bdec2b07833c378b6264e009804b6d68ec20cae4e90d1e65a7958c149ba",
+    "osb/agents/implementer.md": "b810256010d5ed26256792153a41888706381069f4011e8e5ff8e3b27640ef32",
+    "osb/agents/qa.md": "743b0acf062041513a728ea4d5b10cefb808931224b5218ee5e06474d8b4355c",
+    "osb/agents/reviewer.md": "5ac4be8d824342ec342516999b8c3395c60ff6744428dcd9d2ebce49d747a691",
+    "osb/docs/BASELINE.md": "f1d6660802b1eb3805713a87cc3ad5587e6e3fdeebd3b95aacdcbdb3812284be",
+    "osb/docs/BENCHMARKING.md": "255a3ccb5e47676b593f0172e69c81eb4b5f4d752f3f5a55fe41e303c5532019",
+    "osb/docs/CLAUDE.md": "389eaeeb2e1e6cb23cb4a89f7d335806d1378e455f08cdf10523554002a2e548",
+    "osb/docs/CODEX.md": "915ece3110ab34d4f841c296f8863296297f7f66274ba80b2f2af91b51f31d18",
+    "osb/docs/COPILOT.md": "b3a40ea53f9b86702c7f7ea089ce2964720b758733a5c31a0db9ca39cd4beb98",
+    "osb/docs/HOST_COMPATIBILITY.md": "e388b74191ea0d75d1eb0c6d42825134d1ec53c2ea84504eb615dadf8b19dbc2",
+    "osb/docs/INSTALL.md": "37f9500e3739ba0c2a75eaf1815d700b0d0620864af6476f46b65822a96425c4",
+    "osb/docs/METRICS.md": "6d69617c488c0943baac82c9e99a7796375e2b6c6da7f7a284f21db40e622904",
+    "osb/docs/MULTI_REPO.md": "f52ff5a032aa9421c07778d4d424406091a1ea8fd9399d3cd8b1ed88de3fae0f",
+    "osb/docs/OSB_V2_CONTRACT.md": "da99562be3ace60e18bc4feac2fd8a24e781dc15d16b5e6895a7698ec652e3a6",
+    "osb/docs/RAGMONK.md": "f54946a244d5b5c04b5de532ed8020c7bd99a13f8113d7a4cbe844f0770d9e33",
+    "osb/docs/UPGRADE.md": "c4a552dfa6d86b8fa43086815bc9421ed52d20a32679c72e09f8e66bd4d38003",
+    "osb/hosts/claude/agent.md.tmpl": "54fb21d66f1557228ef4cd8070feacddd6e0a996a1f630268c49cfd28e950599",
+    "osb/hosts/claude/skill.md.tmpl": "86c6bd0829968a5f83ba28a8c153f2da782abc41cd8ca3d1d4d3b2d0ae697d4c",
+    "osb/hosts/codex/agent.toml.tmpl": "a9d6b7522ad1315884fe9aff34e28f4ed058f1ba284906461e4ab47e934949f6",
+    "osb/hosts/copilot/agent.md.tmpl": "68817c5f5f6ee9c6dee2d6f0710c953b19a23414acf541acf1ee08ba1ec9c5eb",
+    "osb/hosts/copilot/copilot-instructions.md.tmpl": "1737aee803be3028ea7dd9abe7a04e61ed297ec64d6feee86410c3069699ea67",
+    "osb/install.ps1": "c922e54cf5dfb089eb95613962f9e40aa42744e4018a4db157d89b11bd164e2e",
+    "osb/install.sh": "45c7cd1b03dd3130c76efc333b3533bda24a1e0da993e3afac72beaba4e77e94",
+    "osb/references/handoff.md": "d967bba55cc8c404e33fbe0efb2e5d4266a36316d1d81e45064f26c76f85ee82",
+    "osb/references/knowledge.md": "808e41484a4ee8140b77ad6cd7d9f5701b421a193905eb192fd82e043cac8547",
+    "osb/references/quality.md": "846e85f3e66d45dbe2c27df20e9d3deba1ac14d0cdf11d63d27cb2c7ecc9c318",
+    "osb/references/ragmonk.md": "2b4026f570e2bbd404c5027f3038132d6c5b3f5f67d9a0943259e76b5f913f21",
+    "osb/references/roles.md": "8d543d72691f3e153df1819940dd4fe9090b5aff6e09da03c7707a3e633e43e0",
+    "osb/references/state.md": "69c0440a335c9be958f273408a4e7cf01c1f2c07b660612bae7a3aad66a5ba2e",
+    "osb/references/workflow.md": "f2a8b7c6b35ab795c8db6c0c32d52a602369d53b4364c84f3951f6b8b866763b",
+    "osb/schemas/knowledge-event.schema.json": "014db18d0bbf6fae7f623e576b1ec388606424dd4dbc6e61e667af2aa9c0051c",
+    "osb/schemas/role-result.schema.json": "7df3457e619b728f446ca3a2078546e0929a4ee2c93cb98c489077bc6c83c9e4",
+    "osb/schemas/run-metrics.schema.json": "c8715cbb4e8ef9846fa892c3982559a57f24207685cce9f2d3c3c4c996814e6a",
+    "osb/schemas/task-state.schema.json": "4891a844a454f567d508a8f8e1310d3852e134d77a0ae3aabbf3d75e59720e41",
+    "osb/scripts/benchmark_report.py": "ca8e2e3273761c2a8eabc6bef4435205bb6bdb355d96021204d27c8e3c3de834",
+    "osb/scripts/classify_task.py": "29e1ab7d9577b751cbafc9c872ccbbd2b5ead1686d870145843931bc8cdf3823",
+    "osb/scripts/generate_hosts.py": "c07a37c8dac5e840bdf31e790eb68d3c5be8f5256bf71f8a0e7cd9fb6c109449",
+    "osb/scripts/host_preflight.py": "ea6a6d4d5a2c2721611a7bf9a0cb664044e8e072109164b6ab8ab82e86e1f269",
+    "osb/scripts/install.py": "db360a8f619813a67d177295db2b33906c0199ac964d6d108a9f062bae3aaa0c",
+    "osb/scripts/knowledge_lifecycle.py": "9b66a90d570cccb9ae2c0b32d6cc9419ee6c03288eb10dcffcee364d8b1f1f5d",
+    "osb/scripts/schema_validate.py": "e0203c049b3383aa9c4f8659664a14bfbab584bd7f653d080290995507546230",
+    "osb/scripts/validate_osb.py": "3dc28bf2b83a52dbfcf7e2622a9ad9274cb3729fc4c600fc6b690cdb9d624992",
+    "osb/scripts/verify_task.py": "888835a667656f6ccdb29c4b7e33c3159dd0f54e2b6584e53fc550ba76f0becc",
+    "osb/scripts/workspace_validate.py": "fd9ed80ba52d9d2bc353b0c8a966e11f07f9677ddee0d0a9bc58bed4d9acb52f",
+    "osb/scripts/worktree_guard.py": "893e67f5aeb33a2172c23fddb349327b62848e5a477109f6e704ef3a93c7aa05",
+    "osb/scripts/yaml_lite.py": "914152e57898f63a331a0bdc4430533ea2b9e119ce217a11d348684a57876362",
+    "osb/templates/knowledge/component.md": "b0dcfa6dbd9463aef9221814b4c6aaa828fd25db45002a2bb9a1d667e3d5a876",
+    "osb/templates/knowledge/task.md": "acfeb4e6bef0b390dd2ae1e656f709d85a87a8fbb00289e63c3625230912edac",
+    "osb/templates/osb.yaml": "0426c3bc264acf1b8e2179ac75c167b7fbf77d7274f38679feb5db9866c5648b",
+    "osb/templates/state/task.json": "903942cbb2eca9c80f774ccc2b8321c12b225d7721e559e85b923b233b0bfa1c",
+    "osb/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "osb/tests/_helpers.py": "419099d2d63679661947c44f565c243f1ecb435270fa57923a61bc9962d29f81",
+    "osb/tests/fixtures/host_capability/claude-code.json": "991875ea20b90c9d68d7000a6d01124b723568f806cf42fa0acc5d2629a8779c",
+    "osb/tests/fixtures/host_capability/codex.json": "65fd02871fbb37412faa2dc889688812ededbfa76d9c5a1eb452c5ed698deb6f",
+    "osb/tests/fixtures/host_capability/copilot.json": "76e50e7c21880722a06c5c324b1fb56b17cdd15aec7efee34e9be6b4c9b5276c",
+    "osb/tests/fixtures/tasks/changed-working-tree.json": "b81cb6c515b767e1015fec9eecf799e041945c2e61725a27bc87d088412902cd",
+    "osb/tests/fixtures/tasks/interrupted-task.json": "b3fcaa8e75965fe3e9c4a36ab4e45f010957d24b13408e3fcbddb3ea2ef7f92c",
+    "osb/tests/fixtures/tasks/multi-file-feature.json": "529ef6f785fb073ab409322301e6759f0b073d5e4b10cf5b1198bbd7f487c8d9",
+    "osb/tests/fixtures/tasks/security-sensitive.json": "0ec758427259be61b86e98d7c313e93d0cf13abe25cbc4526673514f2f4635ae",
+    "osb/tests/fixtures/tasks/single-file-bug.json": "9eba87224dd174d24b26ef11ef9179c12ec07b9e28463e07154b2f548b22e8c2",
+    "osb/tests/fixtures/tasks/two-repo-shared-contract.json": "512ee3ebf6ef9d487ed5a5262965bf2f88a1bf0d5071028d48ed115187604f68",
+    "osb/tests/test_benchmark_report.py": "8f5e6f90fe503c37f56009b8283f2f80d8fd5e0ddfbc88b504a8d378bf276f4c",
+    "osb/tests/test_classify_task.py": "5fe23289f51a2da525e4858e2bd4eb4475b861e326317f4c519fc74d2b428bfb",
+    "osb/tests/test_fixtures.py": "7bd0a45420e9d5a687eae8cb7760d130e4ad057343933a6644fa441fd4993fb2",
+    "osb/tests/test_generate_hosts.py": "fcdd50ed6f8d51d9be2f7f5c6e7ec2457f704e5b5d5e7bc834709bc8931c6251",
+    "osb/tests/test_host_preflight.py": "4449b2d6406f782da1f9d64c04529556524cab552ea8ad037fd9a269c68bbe34",
+    "osb/tests/test_install.py": "f097a6cb6793ff0617ef61c69ada923fc08b0e7d3924ed18d049b6a4dc580ec3",
+    "osb/tests/test_knowledge_lifecycle.py": "98ba88790a70da8de10d8489059775cc9b7b5ced63cf75ec6a435d5bdbdfb1ed",
+    "osb/tests/test_schemas.py": "1c7f914fea404f4db44c4a04052285dcb3bcde00bdfb9223b99b42b908a7dcd4",
+    "osb/tests/test_validate_osb.py": "10beb417a66fa2e1ffc121102c0430e3277e600b8131e98432e727ba147cd8f7",
+    "osb/tests/test_verify_task.py": "dbf853ee3b11b94e45abaec090532c7f69063eefaf8c11a77876e8d6b8324bc1",
+    "osb/tests/test_workspace_validate.py": "9f9ea08b102221a6c45a07254b805a91237a0298890567c187ad865298dc4035",
+    "osb/tests/test_worktree_guard.py": "74e2997568b35275c44964011f05bcdad602892ec882d67455bea7adeb8ecbf0",
+    "osb/tests/test_yaml_lite.py": "1bffb4d8a4dd8546ecbb11e75abcda9404ac768719c6eaf1d73eef59fa255ed7"
+  },
+  "package_version": "2.1.0"
+}

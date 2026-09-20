@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "osb://schemas/knowledge-event.schema.json",
+  "title": "OSB incremental knowledge event",
+  "description": "One line of .osb/knowledge/events/<task-id>.jsonl (osb/references/knowledge.md). Extended in Phase 5 (P1-E) with provenance/freshness fields so retrieval can tell current source-derived evidence from superseded history.",
+  "type": "object",
+  "required": ["id", "type", "summary", "lifecycle_status"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable id for this entry, e.g. a short hash of repository_id+file+summary — used to reference it from a later 'superseded_by'."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "decision", "constraint", "discovery", "gotcha", "assumption",
+        "assumption-invalidated", "review-finding", "qa-result", "follow-up"
+      ]
+    },
+    "role": {"type": "string", "enum": ["architect", "implementer", "reviewer", "qa"]},
+    "summary": {"type": "string", "minLength": 1},
+    "component": {"type": "string"},
+    "repository_id": {
+      "type": ["string", "null"],
+      "description": "Required in a multi-repo workspace (osb/docs/MULTI_REPO.md) so retrieval never merges results across repositories ambiguously. Null/absent in single-repo mode."
+    },
+    "files": {"type": "array", "items": {"type": "string"}},
+    "source_path": {"type": ["string", "null"], "description": "The specific file/symbol this entry is derived from, when applicable."},
+    "source_revision": {
+      "type": ["string", "null"],
+      "description": "Commit SHA or content fingerprint of source_path at the time this entry was recorded. Used to detect when the source has since changed (osb/references/knowledge.md §Provenance and freshness)."
+    },
+    "timestamp": {"type": ["string", "null"], "description": "ISO-8601 timestamp this entry was recorded."},
+    "lifecycle_status": {
+      "type": "string",
+      "enum": ["provisional", "verified", "superseded"],
+      "description": "'provisional': not yet independently confirmed. 'verified': confirmed by Reviewer/QA or a re-check against current source. 'superseded': kept for audit history, no longer authoritative — see superseded_by."
+    },
+    "superseded_by": {
+      "type": ["string", "null"],
+      "description": "id of the entry that superseded this one, required when lifecycle_status is 'superseded'."
+    }
+  }
+}
