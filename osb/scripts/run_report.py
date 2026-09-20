@@ -30,10 +30,6 @@ EXECUTION_REPORT_SCHEMA = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
 UNAVAILABLE = "unavailable"
 
 
-class RunReportError(RuntimeError):
-    pass
-
-
 def now_utc() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 

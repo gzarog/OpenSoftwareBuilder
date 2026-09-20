@@ -35,10 +35,6 @@ EXPAND_CONTEXT = "expand-context"
 QUESTION_UNRESOLVED = "question-unresolved"
 
 
-class RecoveryPolicyError(RuntimeError):
-    pass
-
-
 def normalize_failure_signature(text: str) -> str:
     """Deterministic normalization so trivially reworded identical failures are still
     recognized as the same signature (whitespace/case collapse only — never a fuzzy or

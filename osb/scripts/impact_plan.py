@@ -37,10 +37,6 @@ DEFAULT_MAX_DEPENDENTS = 500
 _TEST_SUFFIXES = ("tests", "test", "spec", "specs")
 
 
-class ImpactPlanError(RuntimeError):
-    pass
-
-
 # ---------------------------------------------------------------------------
 # C# project-reference graph (deterministic, metadata-only)
 # ---------------------------------------------------------------------------

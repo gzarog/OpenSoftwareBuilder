@@ -44,10 +44,6 @@ _CSPROJ_PROJECT_REF_RE = re.compile(r'<ProjectReference\s+[^>]*Include="([^"]+)"
 _CSPROJ_PACKAGE_REF_RE = re.compile(r'<PackageReference\s+[^>]*Include="([^"]+)"', re.IGNORECASE)
 
 
-class DiscoveryError(RuntimeError):
-    pass
-
-
 # ---------------------------------------------------------------------------
 # Git helpers (read-only)
 # ---------------------------------------------------------------------------
