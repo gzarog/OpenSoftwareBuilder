@@ -1,0 +1,14 @@
+{
+  "host": "claude",
+  "native_invocation": "/osb <task>",
+  "verified": "not run",
+  "capabilities": {
+    "models_configured": "checked via osb.yaml models.claude-code.*",
+    "generated_adapter_present": "checked: .claude/skills/osb/SKILL.md, .claude/agents/*.md",
+    "role_dispatch": "native subagent tool (Agent tool with subagent_type)",
+    "sandbox_permission_mode": "host-managed tool permission prompts, not OSB-owned",
+    "git_worktree": "checked only when execution.isolation: worktree",
+    "test_command": "project-specific, not checked by host_preflight.py",
+    "ragmonk": "MCP preferred if connected in session, else CLI"
+  }
+}

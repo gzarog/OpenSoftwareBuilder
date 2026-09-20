@@ -116,6 +116,8 @@ EXPECTED_PACKAGE_FILES = (
     "scripts/benchmark_report.py",
     "schemas/run-metrics.schema.json",
     "docs/BENCHMARKING.md",
+    "scripts/host_preflight.py",
+    "docs/HOST_COMPATIBILITY.md",
     "schemas/task-state.schema.json",
     "schemas/role-result.schema.json",
     "templates/osb.yaml",

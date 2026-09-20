@@ -1,0 +1,14 @@
+{
+  "host": "codex",
+  "native_invocation": "$osb <task>",
+  "verified": "not run",
+  "capabilities": {
+    "models_configured": "checked via osb.yaml models.codex.*",
+    "generated_adapter_present": "checked: .agents/skills/osb/SKILL.md, .codex/agents/*.toml",
+    "role_dispatch": "native agent config with per-role sandbox_mode",
+    "sandbox_permission_mode": "architect/reviewer/qa: read-only; implementer: workspace-write",
+    "git_worktree": "checked only when execution.isolation: worktree",
+    "test_command": "project-specific, not checked by host_preflight.py",
+    "ragmonk": "MCP preferred if supported by the Codex environment, else CLI"
+  }
+}

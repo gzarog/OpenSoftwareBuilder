@@ -1,0 +1,15 @@
+{
+  "host": "copilot",
+  "native_invocation": "/osb <task>",
+  "verified": "not run",
+  "capabilities": {
+    "models_configured": "checked via osb.yaml models.copilot.*",
+    "generated_adapter_present": "checked: .agents/skills/osb/SKILL.md, .github/copilot-instructions.md, .github/agents/*.agent.md",
+    "role_dispatch": "Agent Skills discovery + .github/agents/*.agent.md",
+    "sandbox_permission_mode": "host-managed, not OSB-owned",
+    "git_worktree": "checked only when execution.isolation: worktree",
+    "test_command": "project-specific, not checked by host_preflight.py",
+    "ragmonk": "MCP if configured in VS Code MCP settings, else CLI",
+    "independent_role_contexts_caveat": "if a Copilot configuration cannot guarantee independent Reviewer/QA contexts, that limitation must be documented rather than presenting a single-context role switch as equivalent independence"
+  }
+}
