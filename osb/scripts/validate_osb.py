@@ -132,6 +132,24 @@ EXPECTED_PACKAGE_FILES = (
     "docs/COPILOT.md",
     "docs/RAGMONK.md",
     "docs/MULTI_REPO.md",
+    # Next Improvements plan (Phases 0-5) — see docs/NEXT_IMPROVEMENTS.md.
+    "scripts/safe_exec.py",
+    "docs/NEXT_IMPROVEMENTS.md",
+    "scripts/workspace_discovery.py",
+    "schemas/workspace-manifest.schema.json",
+    "scripts/impact_plan.py",
+    "schemas/impact-plan.schema.json",
+    "references/impact.md",
+    "docs/IMPACT_AND_TEST_SELECTION.md",
+    "scripts/context_broker.py",
+    "schemas/context-capsule.schema.json",
+    "docs/CONTEXT_BROKER.md",
+    "scripts/recovery_policy.py",
+    "schemas/recovery-event.schema.json",
+    "docs/RECOVERY.md",
+    "scripts/run_report.py",
+    "schemas/execution-report.schema.json",
+    "docs/EXECUTION_REPORTS.md",
 )
 
 # Soft size guardrails (bytes). Guidance, not hard architecture requirements.

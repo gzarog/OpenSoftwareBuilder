@@ -81,6 +81,20 @@ class VerifyTaskTests(unittest.TestCase):
         self.assertTrue(ok, reasons)
         self.assertEqual(reasons, [])
 
+    def test_blocked_phase_is_never_reported_complete(self) -> None:
+        state = _complete_state(self.base_revision, self.fingerprint)
+        state["phase"] = "blocked"
+        ok, reasons = verify_task.check_completion(state, self.repo)
+        self.assertFalse(ok)
+        self.assertTrue(any("phase is 'blocked'" in r for r in reasons))
+
+    def test_recovery_status_blocked_is_never_reported_complete(self) -> None:
+        state = _complete_state(self.base_revision, self.fingerprint)
+        state["recovery"] = {"status": "blocked", "last_blocker": "test environment unavailable"}
+        ok, reasons = verify_task.check_completion(state, self.repo)
+        self.assertFalse(ok)
+        self.assertTrue(any("recovery.status is 'blocked'" in r for r in reasons))
+
     def test_missing_ac_text_is_rejected(self) -> None:
         state = _complete_state(self.base_revision, self.fingerprint)
         state["quality"]["required_ac_ids"] = ["AC1", "AC2"]

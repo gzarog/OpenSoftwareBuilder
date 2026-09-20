@@ -87,3 +87,5 @@ revision, no open blocking findings or evidence gaps, and knowledge consolidated
 - `osb/references/state.md` — execution state schema, checkpoints, compaction, and resume.
 - `osb/references/quality.md` — context-expansion triggers, evidence rules, final review/QA
   gates, and staleness/fingerprint rules.
+- `osb/docs/NEXT_IMPROVEMENTS.md` — opt-in discovery, impact/test selection, context
+  broker, recovery, and reporting features; every default behavior above is unaffected.

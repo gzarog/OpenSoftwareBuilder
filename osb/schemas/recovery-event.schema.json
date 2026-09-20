@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "osb://schemas/recovery-event.schema.json",
+  "title": "OSB recovery event",
+  "description": "One append-only record in .osb/runs/<task-id>/recovery.jsonl (Next Improvements Phase 4) — a repair attempt, a context expansion, or a blocker, tracked by task+role+target+source fingerprint so unrelated findings/ACs/questions never share a retry budget. See osb/docs/RECOVERY.md and osb/references/quality.md.",
+  "type": "object",
+  "required": ["task_id", "role", "event_type", "target_kind", "target_id", "timestamp"],
+  "additionalProperties": false,
+  "properties": {
+    "task_id": {"type": "string", "minLength": 1},
+    "role": {"type": "string", "enum": ["architect", "implementer", "reviewer", "qa"]},
+    "event_type": {"type": "string", "enum": ["repair-attempt", "context-expansion", "blocked", "resume"]},
+    "target_kind": {"type": "string", "enum": ["finding", "ac", "question", "unit"]},
+    "target_id": {"type": "string", "minLength": 1},
+    "implementation_fingerprint": {"type": ["string", "null"]},
+    "failure_signature": {"type": ["string", "null"]},
+    "root_cause_id": {"type": ["string", "null"]},
+    "blocker_kind": {
+      "type": ["string", "null"],
+      "enum": ["missing-evidence", "ragmonk-unavailable", "test-environment-unavailable", "unresolved-dependency", "worktree-conflict", "other", null]
+    },
+    "decision": {"type": ["string", "null"]},
+    "reason": {"type": ["string", "null"]},
+    "timestamp": {"type": "string", "minLength": 1}
+  }
+}

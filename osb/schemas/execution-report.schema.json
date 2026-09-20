@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "osb://schemas/execution-report.schema.json",
+  "title": "OSB per-task execution report",
+  "description": "A deterministic, user-facing report of one actual /osb run at .osb/runs/<task-id>/report.json (Next Improvements Phase 5). Distinct from osb/schemas/run-metrics.schema.json, which is for before/after benchmark fixtures and requires a fixture_id; this schema is for ordinary task reports and never forces a fixture linkage. Never RagMonk-indexed knowledge, never part of .osb/state/, and never a completion gate on its own. See osb/docs/EXECUTION_REPORTS.md.",
+  "type": "object",
+  "required": ["task", "scope", "quality", "efficiency", "recovery", "provenance"],
+  "additionalProperties": false,
+  "properties": {
+    "task": {
+      "type": "object",
+      "required": ["task_id", "final_status", "report_generated_at"],
+      "properties": {
+        "task_id": {"type": "string", "minLength": 1},
+        "host": {"type": ["string", "null"]},
+        "models": {"type": "object"},
+        "started_at": {"type": ["string", "null"]},
+        "ended_at": {"type": ["string", "null"]},
+        "elapsed_seconds": {"$ref": "#/$defs/numberOrUnavailable"},
+        "final_status": {"type": "string", "enum": ["complete", "blocked", "failed", "interrupted"]},
+        "report_generated_at": {"type": "string", "minLength": 1},
+        "benchmark_fixture_id": {"type": ["string", "null"], "description": "Optional linkage to osb/schemas/run-metrics.schema.json for before/after comparison; never required."}
+      }
+    },
+    "scope": {
+      "type": "object",
+      "required": ["repositories_affected", "units"],
+      "properties": {
+        "repositories_affected": {"type": "array", "items": {"type": "string"}},
+        "workspace_manifest_fingerprint": {"type": ["string", "null"]},
+        "changed_files_count": {"$ref": "#/$defs/numberOrUnavailable"},
+        "units": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "status"],
+            "properties": {
+              "id": {"type": "string"},
+              "status": {"type": "string"},
+              "repository_id": {"type": ["string", "null"]}
+            }
+          }
+        },
+        "current_patch_fingerprint": {"type": ["string", "null"]},
+        "workspace_fingerprint": {"type": ["string", "null"]},
+        "local_changes_only": {"type": "boolean", "description": "true unless the coordinator confirms changes were actually pushed/merged — never implies a cross-repo atomic commit."}
+      }
+    },
+    "quality": {
+      "type": "object",
+      "required": ["required_ac_ids", "verified_ac_ids", "unverified_ac_ids", "review_status", "qa_status"],
+      "properties": {
+        "required_ac_ids": {"type": "array", "items": {"type": "string"}},
+        "verified_ac_ids": {"type": "array", "items": {"type": "string"}},
+        "unverified_ac_ids": {"type": "array", "items": {"type": "string"}},
+        "review_status": {"type": "string"},
+        "review_scope": {"type": ["string", "null"]},
+        "review_fingerprint": {"type": ["string", "null"]},
+        "qa_status": {"type": "string"},
+        "qa_fingerprint": {"type": ["string", "null"]},
+        "integration_checks_run": {"type": "array", "items": {"type": "string"}},
+        "missing_test_evidence": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "efficiency": {
+      "type": "object",
+      "properties": {
+        "elapsed_seconds": {"$ref": "#/$defs/numberOrUnavailable"},
+        "role_dispatches": {"$ref": "#/$defs/numberOrUnavailable"},
+        "tool_calls": {"$ref": "#/$defs/numberOrUnavailable"},
+        "input_tokens": {"$ref": "#/$defs/numberOrUnavailable"},
+        "output_tokens": {"$ref": "#/$defs/numberOrUnavailable"},
+        "ragmonk_chars_retrieved": {"$ref": "#/$defs/numberOrUnavailable"},
+        "capsule_cache_hits": {"$ref": "#/$defs/numberOrUnavailable"},
+        "capsule_cache_misses": {"$ref": "#/$defs/numberOrUnavailable"},
+        "context_expansions": {"$ref": "#/$defs/numberOrUnavailable"},
+        "repair_attempts": {"$ref": "#/$defs/numberOrUnavailable"},
+        "repeated_failure_blocks": {"$ref": "#/$defs/numberOrUnavailable"}
+      }
+    },
+    "recovery": {
+      "type": "object",
+      "properties": {
+        "unresolved_blockers": {"type": "array", "items": {"type": "string"}},
+        "partial_scan_or_impact_unknowns": {"type": "array", "items": {"type": "string"}},
+        "preserved_worktree_paths": {"type": "array", "items": {"type": "string"}},
+        "resume_instruction": {"type": ["string", "null"]}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "evidence_refs": {"type": "array", "items": {"type": "string"}},
+        "metric_sources": {
+          "type": "object",
+          "patternProperties": {"^.+$": {"type": "string", "enum": ["measured", "synthetic", "unavailable"]}},
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "numberOrUnavailable": {
+      "oneOf": [
+        {"type": "number"},
+        {"type": "string", "const": "unavailable"}
+      ]
+    }
+  }
+}

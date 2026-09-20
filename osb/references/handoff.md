@@ -165,6 +165,18 @@ verification target(s)` map in task state (`state.md`). If the Architect changes
 requirement or interface mid-task, update every affected capsule and invalidate the
 work/checks it impacts before resuming that unit, review, or QA.
 
+## Optional context broker fields (Next Improvements Phase 3)
+
+A role dispatch may additionally carry `context_capsule_ref`, `impact_plan_ref`,
+`scope_fingerprint`, and `unresolved_questions` — references into a context capsule built
+by `osb/scripts/context_broker.py` (`osb/docs/CONTEXT_BROKER.md`) and/or an impact plan
+(`osb/references/impact.md`). These are optional and additive: the coordinator remains
+responsible for turning a reference into sufficient, scoped evidence for the receiving
+role — an Implementer still receives only its unit's capsule content, a Reviewer still
+inspects the full combined change on a final pass, and QA still receives every required AC
+and verification target. Nothing about these fields changes the shapes above or requires a
+new provider-specific response format.
+
 ## Dispatch brief checklist
 
 Every role dispatch (subagent call, provider agent invocation, or context handoff) must

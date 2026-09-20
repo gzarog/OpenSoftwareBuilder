@@ -77,6 +77,15 @@ QA gate requires every AC to be independently checked on the final revision ever
 capsule-reuse rule for retrieved *context* must never be read as a shortcut for the
 mandatory QA re-run itself.
 
+## Relationship to per-task execution reports
+
+`osb/schemas/run-metrics.schema.json` (this document) is for **before/after fixture**
+comparisons and requires a `fixture_id` — it is not the right shape for reporting an
+ordinary user task. `osb/docs/EXECUTION_REPORTS.md` (Next Improvements Phase 5) covers
+that case with its own `osb/schemas/execution-report.schema.json`, with only an optional
+linkage back to a benchmark fixture. Both share the same measurement labels and discipline
+(`osb/docs/METRICS.md`).
+
 ## Tuning classification-based behavior
 
 Only tune `task_profile`-based initial retrieval/parallelism (`workflow.md` §Task

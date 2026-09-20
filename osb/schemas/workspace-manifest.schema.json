@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "osb://schemas/workspace-manifest.schema.json",
+  "title": "OSB confirmed workspace manifest",
+  "description": "A derived, explicitly-confirmed snapshot of discovered/configured repositories at .osb/cache/workspace-manifest.json (Next Improvements Phase 1). Never authoritative on its own — osb.yaml remains the human-authored source of configuration; see osb/docs/MULTI_REPO.md §Discovery.",
+  "type": "object",
+  "required": ["schema_version", "workspace_root", "scan_status", "repositories", "confirmed_edges", "possible_edges", "manifest_fingerprint"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "integer", "const": 1},
+    "workspace_root": {"type": "string", "minLength": 1},
+    "scan_status": {"type": "string", "enum": ["complete", "partial"]},
+    "repositories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "path": {"type": "string", "minLength": 1},
+          "git_head": {"type": ["string", "null"]},
+          "root_commit": {"type": ["string", "null"]},
+          "source": {"type": "string", "enum": ["discovered", "configured", "renamed"]},
+          "renamed_from": {"type": ["string", "null"], "description": "Previous path, set only when source is 'renamed' and pending confirmation."}
+        }
+      }
+    },
+    "confirmed_edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "source", "evidence"],
+        "additionalProperties": false,
+        "properties": {
+          "from": {"type": "string", "minLength": 1},
+          "to": {"type": "string", "minLength": 1},
+          "source": {"type": "string", "enum": ["explicit", "project-reference"]},
+          "evidence": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "possible_edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "from": {"type": "string", "minLength": 1},
+          "to": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1},
+          "evidence": {"type": "string"}
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "path", "detail"],
+        "properties": {
+          "kind": {"type": "string", "enum": ["permission-denied", "depth-limit", "symlink-escape", "nested-repo-skipped", "rename-candidate", "outside-root-rejected"]},
+          "path": {"type": "string"},
+          "detail": {"type": "string"}
+        }
+      }
+    },
+    "confirmed_at": {"type": ["string", "null"]},
+    "manifest_fingerprint": {"type": "string", "minLength": 1}
+  }
+}
