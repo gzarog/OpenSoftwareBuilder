@@ -75,6 +75,10 @@
       "properties": {
         "mode": {"type": "string", "enum": ["single-repo", "multi-repo"]},
         "workspace_fingerprint": {"type": ["string", "null"]},
+        "manifest_fingerprint": {
+          "type": ["string", "null"],
+          "description": "The confirmed workspace-manifest.schema.json fingerprint this task was scoped against (Next Improvements Phase 1), when discovery was used. A newly affected repository changes this and invalidates stale review/QA approvals the same way an explicit workspace change does. Null when the workspace was configured explicitly without discovery."
+        },
         "repositories": {
           "type": "object",
           "patternProperties": {

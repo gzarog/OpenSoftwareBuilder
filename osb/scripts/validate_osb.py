@@ -132,6 +132,11 @@ EXPECTED_PACKAGE_FILES = (
     "docs/COPILOT.md",
     "docs/RAGMONK.md",
     "docs/MULTI_REPO.md",
+    # Next Improvements plan (Phases 0-5) — see docs/NEXT_IMPROVEMENTS.md.
+    "scripts/safe_exec.py",
+    "docs/NEXT_IMPROVEMENTS.md",
+    "scripts/workspace_discovery.py",
+    "schemas/workspace-manifest.schema.json",
 )
 
 # Soft size guardrails (bytes). Guidance, not hard architecture requirements.
